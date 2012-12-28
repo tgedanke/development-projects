@@ -1,0 +1,64 @@
+.new-record {
+    background-image: url( ../../resources/images/add.png );
+}
+.exit-user {
+    background-image: url( ../../resources/images/cancel.png );
+}
+.new-user {
+    background-image: url( ../../resources/images/user.png );
+}
+.new-event {
+    background-image: url( ../../resources/images/add_.png );
+}
+.event-date {
+    background-image: url( ../../resources/images/add_note.png );
+}
+.event-del {
+    background-image: url( ../../resources/images/remove.png );
+}
+.event-view {
+    background-image: url( ../../resources/images/note.png );
+}
+.x-action-col-cell img.date-delet {
+    background-image: url( ../../resources/images/delet.png );
+	height : 16px;
+	width : 16px;
+}
+.x-action-col-cell img.date-edit {
+    background-image: url( ../../resources/images/edit.png );
+	height : 16px;
+	width : 16px;
+}
+.clear {
+    background-image: url( ../../resources/images/delete.png );
+}
+.report {
+    background-image: url( ../../resources/images/doc.png );
+}
+.filter {
+    background-image: url( ../../resources/images/filter.png );
+}
+.x-action-col-cell img.ex-unch {
+    background-image: url( ../../resources/images/unch.gif );
+	height : 16px;
+	width : 16px;
+	cursor : pointer;
+}
+.x-action-col-cell img.ex-ch {
+    background-image: url( ../../resources/images/ch.gif );
+	height : 16px;
+	width : 16px;
+	cursor : pointer;
+}
+.x-action-col-cell img.ex-unche {
+    background-image: url( ../../resources/images/unch.gif );
+	height : 16px;
+	width : 16px;
+	
+}
+.x-action-col-cell img.ex-che {
+    background-image: url( ../../resources/images/ch.gif );
+	height : 16px;
+	width : 16px;
+	
+}
