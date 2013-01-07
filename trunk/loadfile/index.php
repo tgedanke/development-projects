@@ -12,9 +12,14 @@
 include_once('uploadfile.php');
 
 /*obj*/
-$a = new Loader (GetCWD()."/tmpfolder/", array("gif", "jpeg", "jpg", "png","xls","xlsx","zip"));
+//$a = new Loader (GetCWD()."/tmpfolder/", array("gif", "jpeg", "jpg", "png","xls","xlsx","zip"),0);
+//
+$a = new Loader ("", array("gif", "jpeg", "jpg", "png","xls","xlsx","zip"),1);
+
 $a->loads();
-$dbins = new DBIsert ($a->fname, $a->ftype, $a->fsize, $a->fnewname, '/tmpfolder/', 'localhost', 'root', '','test');
+
+
+$dbins = new DBIsert ($a->fname, $a->ftype, $a->fsize, $a->fnewname, $a->flplace, 'localhost', 'root', '','test');
 if ( strlen($dbins->fname) > 0) 
 	{ $dbins->insertDB();
 	}
