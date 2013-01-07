@@ -8,14 +8,22 @@ class Loader
 	public $fsize;
 	public $fstatus;
 	public $fnewname;
+	public $fplace;
+	public $flplace;
 	
-	
-	function Loader($folder, $whitelist)
+	function Loader($folder, $whitelist,$fplace)
 	{
 		$this->folder = $folder;
 		$this->whitelist = $whitelist;
+		$this->fplace = $fplace;
 	}
 	function loads()
+	{
+	if($this->fplace == 0) {$this->loadlocal();}
+	if($this->fplace == 1) {$this->loadyandex();}
+	}
+	
+	function loadlocal()
 	{
 		if(isset($_POST['upload']))
 		{
@@ -24,6 +32,7 @@ class Loader
 
 			if($error) die("Ошибка,  Вы не можете загружать файл этого типа"); 
 			$uploadedFile = $this->folder.basename($_FILES['uploadFile']['name']);
+			
 			if(!empty($_FILES['uploadFile']['tmp_name']))
 			{ 
 			//ini_set('memory_limit', '32M');
@@ -36,8 +45,8 @@ class Loader
 					$this->ftype = $_FILES['uploadFile']['type'];
 					$this->fsize = round($_FILES['uploadFile']['size']/1024,2).' кб.';
 					$this->fnewname	= $file_name.$file_ext;				
-					$this->fstatus = 'Файл загружен';
-								
+					$this->fstatus = 'Файл загружен localhost';
+					$this->flplace = '/tmpfolder/';			
 				}
 				else   
 				{
@@ -51,8 +60,114 @@ class Loader
 			
 		}
 	}
+function loadyandex()
+{
 	
+	if(isset($_POST['upload']))
+	{
+		$error = true;
+		if(in_array(strtolower(substr($_FILES['uploadFile']['name'], 1+strrpos($_FILES['uploadFile']['name'],"."))),$this->whitelist) ) $error = false;
 
+		if($error) die("Ошибка,  Вы не можете загружать файл этого типа"); 
+		$uploadedFile = $this->folder.basename($_FILES['uploadFile']['name']);
+			
+		if(!empty($_FILES['uploadFile']['tmp_name']))
+		{ 
+			//ini_set('memory_limit', '32M');
+				$file_ext =  strtolower(strrchr($_FILES['uploadFile']['name'],'.'));
+				$file_name = uniqid(rand(10000,99999));
+				$uploadedFile  = $this->folder.$file_name.$file_ext;
+			
+				$login = 'mirrorYNDX@yandex.ru';
+				$password = 'Dthjybrfnik';
+				$filename = $uploadedFile;
+				
+					$cookie_file = 'cookie.txt';
+				$user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; ru; rv:1.9.0.6) Gecko/2009011913 Firefox/3.0.6';
+			 
+				// логинимся в систему
+				$ch = curl_init('https://passport.yandex.ru/passport?mode=auth');
+			 
+				$fields = array();
+				$fields[] = "login=$login";
+				$fields[] = "passwd=$password";
+				$fields[] = "twoweeks=yes";
+				curl_setopt($ch, CURLOPT_POSTFIELDS, implode('&', $fields));
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+				curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
+				curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+				curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_file);
+				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,  0);
+				curl_setopt($ch, CURLOPT_POST, 1);
+				$result = curl_exec($ch);
+				$info = curl_getinfo($ch);
+			 
+				if ($info['http_code'] != 200) return false;
+			 
+				// запрашиваем сервер для загрузки файла
+				$url = 'http://narod.yandex.ru/disk/getstorage/?rnd=' . (mt_rand( 0, 777777) + 777777);
+			 
+				curl_setopt($ch, CURLOPT_URL, $url);
+				curl_setopt($ch, CURLOPT_POST,  0);
+				curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_file);
+				$result = curl_exec($ch);
+				$info = curl_getinfo($ch);
+			 
+				if (preg_match('/"url":"(.*?)", "hash":"(.*?)", "purl":"(.*?)"/', $result, $m)) {
+				  $upload_url = $m[1];
+				  $hash = $m[2];
+				  $purl = $m[3];
+				} else {
+					return false;
+				}
+				
+				   // загружаем файл на сервер
+				$url = $upload_url . '?tid=' . $hash;
+				$fields = array();
+				$fields['file'] = '@' . $filename;
+				curl_setopt($ch, CURLOPT_URL, $url);
+				curl_setopt($ch, CURLOPT_REFERER, 'http://narod.yandex.ru/');
+				curl_setopt($ch, CURLOPT_POST, 1);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+				$result = curl_exec($ch);
+				$info = curl_getinfo($ch);
+			 
+				if ($info['http_code'] != 200) return false;
+			 
+ //   print_r($info);
+				// проверяем прогресс бар
+				$url = $purl . '?tid=' . $hash . '&rnd=' . (mt_rand( 0, 777777) + 777777);
+			 
+				curl_setopt($ch, CURLOPT_URL, $url);
+				curl_setopt($ch, CURLOPT_POST,  0);
+				$result = curl_exec($ch);
+			 
+				if (!preg_match('/"status": "done"/', $result, $m)) {
+				  return false;
+				}
+ 
+				// переходим на страницу и определяем ссылку
+				$url = 'http://narod.yandex.ru/disk/last/';
+				curl_setopt($ch, CURLOPT_URL, $url);
+				$result = curl_exec($ch);
+				curl_close($ch);
+			 
+				if (preg_match('/<span class=\'b\-fname\'><a href="(.*?)">/', $result, $m)) {
+				  $fileURL = trim($m[1]);
+				  return $fileURL;
+				  	$this->fname = $_FILES['uploadFile']['name'];
+					$this->ftype = $_FILES['uploadFile']['type'];
+					$this->fsize = round($_FILES['uploadFile']['size']/1024,2).' кб.';
+					$this->fnewname	= $file_name.$file_ext;				
+					$this->fstatus = 'Файл загружен yandex';
+					$this->flplace = $fileURL;
+				}
+			 
+				return false;
+
+		}		
+	}
+}
 }
 	
 class DBIsert
