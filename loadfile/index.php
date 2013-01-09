@@ -12,38 +12,52 @@
 include_once('uploadfile.php');
 
 /*obj*/
-//$a = new Loader (GetCWD()."/tmpfolder/", array("gif", "jpeg", "jpg", "png","xls","xlsx","zip"),0);
-//
-$a = new Loader ("", array("gif", "jpeg", "jpg", "png","xls","xlsx","zip"),1);
+$a = new Loader (GetCWD()."/tmpfolder/", array("gif", "jpeg", "jpg", "png","xls","xlsx","zip"));
+echo $a->loads();
 
-$a->loads();
+$dbins = new DBInsert ($a->fname, $a->ftype, $a->fsize, $a->fnewname, '/tmpfolder/', 'localhost', 'root', '','test');
 
-
-$dbins = new DBIsert ($a->fname, $a->ftype, $a->fsize, $a->fnewname, $a->flplace, 'localhost', 'root', '','test');
+//занесем в базу, что загрузили
 if ( strlen($dbins->fname) > 0) 
-	{ $dbins->insertDB();
+	{ 
+	$dbins->insertDB();
 	}
 	
-/*view prop*/
-	echo '<br>' .$a->fstatus;
+// инфо о загрузке
+	echo '<br>' .$a->fstatus . '<hr>';
 	
-	echo '<hr>';
+// для универсальности разбираем массив тут. 	
+	function printData ( $resarray)
+		{
+		if (sizeof($resarray[0])>1)
+			{
+			$inputtxt = '<table>';
+			foreach ($resarray as &$row) 
+				{
+					$inputtxt = $inputtxt . '<tr><td>' . $row['uploadTime']  . '</td>' .
+					'<td>' . $row['autor'] . '</td>'.
+					'<td>' .'<a href="downloadfile.php?fn='.$row['realFileName'].'"   target="_blank">' .$row['autorFileName']. '</a>' . '</td>'.
+					'<td>' .$row['size'] . '</td>'.
+					'</tr>';
+				}
+			unset($row);
+			return $inputtxt . '</table>';
+			}
+		else
+			{
+			return $resarray[0][0];
+			}
+		}
 	
-/*view func*/	
-  $dbins->prints();
+// доступные файлы	
+ echo printData ($dbins->prints());
+ 
+ echo '<hr>';
+ //или так 
+ echo printData ($dbins->prints($a->fnewname));
   
   
   
-  
-/*	$fldr = '/tmp';
-	$flsz = '20M';
-	ini_set('upload_tmp_dir', $fldr);
-	ini_set('upload_max_filesize', $flsz);
-	ini_set('post_max_size', $flsz);*/
-//			echo ini_get('upload_max_filesize');
-//			echo ini_get('post_max_size');
-	/* print_r($_FILES); */
-
  
   ?>
 
