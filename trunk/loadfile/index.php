@@ -5,7 +5,7 @@
 <body>
 <form  enctype="multipart/form-data" action=""  method="post">
  <input  type="file" name="uploadFile"/>
- <input  type="submit" name="upload" value="Загрузить"/>
+ <input  type="submit" name="upload" value="Р—Р°РіСЂСѓР·РёС‚СЊ"/>
  </form>
 <?php
 
@@ -17,16 +17,16 @@ echo $a->loads();
 
 $dbins = new DBInsert ($a->fname, $a->ftype, $a->fsize, $a->fnewname, '/tmpfolder/', 'localhost', 'root', '','test');
 
-//занесем в базу, что загрузили
+//Р·Р°РЅРµСЃРµРј РІ Р±Р°Р·Сѓ, С‡С‚Рѕ Р·Р°РіСЂСѓР·РёР»Рё
 if ( strlen($dbins->fname) > 0) 
 	{ 
 	$dbins->insertDB();
 	}
 	
-// инфо о загрузке
+// РёРЅС„Рѕ Рѕ Р·Р°РіСЂСѓР·РєРµ
 	echo '<br>' .$a->fstatus . '<hr>';
 	
-// для универсальности разбираем массив тут. 	
+// РґР»СЏ СѓРЅРёРІРµСЂСЃР°Р»СЊРЅРѕСЃС‚Рё СЂР°Р·Р±РёСЂР°РµРј РјР°СЃСЃРёРІ С‚СѓС‚. 	
 	function printData ( $resarray)
 		{
 		if (sizeof($resarray[0])>1)
@@ -49,11 +49,11 @@ if ( strlen($dbins->fname) > 0)
 			}
 		}
 	
-// доступные файлы	
+// РґРѕСЃС‚СѓРїРЅС‹Рµ С„Р°Р№Р»С‹	
  echo printData ($dbins->prints());
  
  echo '<hr>';
- //или так 
+ //РёР»Рё С‚Р°Рє 
  echo printData ($dbins->prints($a->fnewname));
   
   

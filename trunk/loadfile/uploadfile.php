@@ -16,18 +16,18 @@ class Loader
 		$this->whitelist = $whitelist;
 	}
 	function loads()
-	{//если выбран файл
+	{//РµСЃР»Рё РІС‹Р±СЂР°РЅ С„Р°Р№Р»
 		if(isset($_POST['upload']))
 		{
 			$error = true;
-			//проверка типа
+			//РїСЂРѕРІРµСЂРєР° С‚РёРїР°
 			if(in_array(strtolower(substr($_FILES['uploadFile']['name'], 1+strrpos($_FILES['uploadFile']['name'],"."))),$this->whitelist) ) $error = false;
-			if($error) die("Ошибка,  Вы не можете загружать файл этого типа"); 
+			if($error) die("РћС€РёР±РєР°,  Р’С‹ РЅРµ РјРѕР¶РµС‚Рµ Р·Р°РіСЂСѓР¶Р°С‚СЊ С„Р°Р№Р» СЌС‚РѕРіРѕ С‚РёРїР°"); 
 			
 			$uploadedFile = $this->folder.basename($_FILES['uploadFile']['name']);
 			if(!empty($_FILES['uploadFile']['tmp_name']))
 			{ 
-				//переименуем для хранения
+				//РїРµСЂРµРёРјРµРЅСѓРµРј РґР»СЏ С…СЂР°РЅРµРЅРёСЏ
 				$file_ext =  strtolower(strrchr($_FILES['uploadFile']['name'],'.'));
 				$file_name = uniqid(rand(10000,99999));
 				$uploadedFile  = $this->folder.$file_name.$file_ext;
@@ -36,19 +36,19 @@ class Loader
 				{  
 					$this->fname = $_FILES['uploadFile']['name'];
 					$this->ftype = $_FILES['uploadFile']['type'];
-					$this->fsize = round($_FILES['uploadFile']['size']/1024,2).' кб.';
+					$this->fsize = round($_FILES['uploadFile']['size']/1024,2).' РєР±.';
 					$this->fnewname	= $file_name.$file_ext;				
-					return 'Файл загружен';
+					return 'Р¤Р°Р№Р» Р·Р°РіСЂСѓР¶РµРЅ';
 								
 				}
 				else   
 				{
-					return 'Во  время загрузки файла произошла ошибка';  
+					return 'Р’Рѕ  РІСЂРµРјСЏ Р·Р°РіСЂСѓР·РєРё С„Р°Р№Р»Р° РїСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР°';  
 				}
 			}
 			else
 			{  
-				return 'Файл не  загружен';  
+				return 'Р¤Р°Р№Р» РЅРµ  Р·Р°РіСЂСѓР¶РµРЅ';  
 			}
 			
 		}
@@ -87,13 +87,13 @@ class DBInsert
 		 $db = mysql_connect($this->hostname, $this->username, $this->password)       
 		 or die('connect to database failed');
 		 
-		 mysql_set_charset('cp1251'); // Устанавливаем нужную кодировку для отрисовки
+		 mysql_set_charset('cp1251'); // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅСѓР¶РЅСѓСЋ РєРѕРґРёСЂРѕРІРєСѓ РґР»СЏ РѕС‚СЂРёСЃРѕРІРєРё
 
-		// Выбираем нужную БД
+		// Р’С‹Р±РёСЂР°РµРј РЅСѓР¶РЅСѓСЋ Р‘Р”
 		mysql_select_db($this->udatabase)
 				or die('db not found');
 				
-		//кодировки для записи в 1251 в бд
+		//РєРѕРґРёСЂРѕРІРєРё РґР»СЏ Р·Р°РїРёСЃРё РІ 1251 РІ Р±Рґ
 		mysql_query("SET NAMES cp1251");  
 		mysql_query("SET CHARACTER SET 'cp1251'");
 		mysql_query ("set character_set_client='cp1251'"); 
@@ -117,7 +117,7 @@ class DBInsert
 		'size	VARCHAR(255), '.
 		'place	VARCHAR(255) NOT NULL ) DEFAULT CHARSET cp1251';
 		mysql_query($query);
-		 //вставляем
+		 //РІСЃС‚Р°РІР»СЏРµРј
 		$query = " INSERT INTO `uploadfile` VALUES (NOW(),'localload','".
 			$this->fname ."','".$this->fnewname ."','" .$this->ftype ."','".$this->fsize ."','" . $this->place . "')"; //".$this->folder ."
 		$result = mysql_query($query)
@@ -132,7 +132,7 @@ class DBInsert
 		$fnname = ($fnname != '')?  'WHERE realFileName like \'' . $fnname .'\'' :'' ;
 		$sql='';
 		$db = $this->connDB();
-		//достаем
+		//РґРѕСЃС‚Р°РµРј
 		$inputtxt ='';
 
 		$query = 'SELECT * FROM `uploadfile`' . $fnname;
@@ -140,12 +140,12 @@ class DBInsert
 				or trigger_error(mysql_errno() . ' ' .	mysql_error() . ' query1: ' . $sql);
 
 				$inputvals = array();
-		// проверяем вернулась ли хотя бы 1 строка
+		// РїСЂРѕРІРµСЂСЏРµРј РІРµСЂРЅСѓР»Р°СЃСЊ Р»Рё С…РѕС‚СЏ Р±С‹ 1 СЃС‚СЂРѕРєР°
 		if (mysql_num_rows($result) > 0)
 		{
 			$i = 0;
-			// вытаскиваем одну за другой строки, помещаем в $row
-			while ($row = mysql_fetch_object($result)) 			// mysql_fetch_assoc($result)  -  строка в виде ассоциативного массива, mysql_fetch_num - порядковые номера колонок , mysql_fetch_array($result) и то и то
+			// РІС‹С‚Р°СЃРєРёРІР°РµРј РѕРґРЅСѓ Р·Р° РґСЂСѓРіРѕР№ СЃС‚СЂРѕРєРё, РїРѕРјРµС‰Р°РµРј РІ $row
+			while ($row = mysql_fetch_object($result)) 			// mysql_fetch_assoc($result)  -  СЃС‚СЂРѕРєР° РІ РІРёРґРµ Р°СЃСЃРѕС†РёР°С‚РёРІРЅРѕРіРѕ РјР°СЃСЃРёРІР°, mysql_fetch_num - РїРѕСЂСЏРґРєРѕРІС‹Рµ РЅРѕРјРµСЂР° РєРѕР»РѕРЅРѕРє , mysql_fetch_array($result) Рё С‚Рѕ Рё С‚Рѕ
 				{
 				$inputvals[$i] = array('uploadTime' => $row->uploadTime,
 											'autor' => $row->autor,
@@ -158,7 +158,7 @@ class DBInsert
 		} 
 		else 
 		{
-			$inputvals[0]= array ( 'err' => 'Таблица `uploadfile` пуста');
+			$inputvals[0]= array ( 'err' => 'РўР°Р±Р»РёС†Р° `uploadfile` РїСѓСЃС‚Р°');
 
 		}
 	mysql_close($db);
