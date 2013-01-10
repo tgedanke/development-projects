@@ -1,9 +1,6 @@
-<html>
-<head>
-</head>
-<body>
+
 <?php
-   
+/*закрузка файла с сервера*/   
 $file = ("tmpfolder/".$_GET['fn']."");
 header ("Content-Type: application/octet-stream");
 header ("Accept-Ranges: bytes");
@@ -12,7 +9,3 @@ header ("Content-Disposition: attachment; filename=".$file);
 readfile($file);
 //---а
 ?>
-
-</body>
-
-</html>
