@@ -1,5 +1,7 @@
 <html>
 <head>
+<!-- страницу отображать в кодировке utf8 -->
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
 </head>
 <body>
@@ -9,24 +11,28 @@
  </form>
 <?php
 
-include_once('uploadfile.php');
+include_once('Loader.php');
+include_once('DBInsert.php');
 
-/*obj*/
+/*obj загрузчик */
 $a = new Loader (GetCWD()."/tmpfolder/", array("gif", "jpeg", "jpg", "png","xls","xlsx","zip"));
+/* загружаем */
 echo $a->loads();
-
+/*obj запись в БД и выборка из БД */
 $dbins = new DBInsert ($a->fname, $a->ftype, $a->fsize, $a->fnewname, '/tmpfolder/', 'localhost', 'root', '','test');
 
-//занесем в базу, что загрузили
+/*занесем в базу, что загрузили*/
 if ( strlen($dbins->fname) > 0) 
 	{ 
 	$dbins->insertDB();
 	}
 	
-// инфо о загрузке
-	echo '<br>' .$a->fstatus . '<hr>';
+/* инфо о загрузке*/
+
 	
-// для универсальности разбираем массив тут. 	
+/* 
+вывод данных 
+для универсальности разбираем массив тут.*/ 	
 	function printData ( $resarray)
 		{
 		if (sizeof($resarray[0])>1)
@@ -45,20 +51,16 @@ if ( strlen($dbins->fname) > 0)
 			}
 		else
 			{
-			return $resarray[0][0];
+			return $resarray[0]['err'];
 			}
 		}
 	
-// доступные файлы	
+/* доступные файлы */	
  echo printData ($dbins->prints());
  
  echo '<hr>';
- //или так 
+ /*или так */
  echo printData ($dbins->prints($a->fnewname));
-  
-  
-  
- 
   ?>
 
 </body>
