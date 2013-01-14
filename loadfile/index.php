@@ -18,6 +18,9 @@ include_once('DBInsert.php');
 $a = new Loader (GetCWD()."/tmpfolder/", array("gif", "jpeg", "jpg", "png","xls","xlsx","zip"));
 /* загружаем */
 echo $a->loads();
+echo '_____ya_____<br>';
+echo $a->LoadYandex();
+
 /*obj запись в БД и выборка из БД */
 $dbins = new DBInsert ($a->fname, $a->ftype, $a->fsize, $a->fnewname, '/tmpfolder/', 'localhost', 'root', '','test');
 

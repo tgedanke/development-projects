@@ -26,6 +26,7 @@ class Loader
 		$this->folder = $folder;
 		$this->whitelist = $whitelist;
 	}
+	
 	/* загружает файл на диск, возвращает статус загрузки*/
 	function loads()
 	{	
@@ -75,8 +76,52 @@ class Loader
 			
 		}
 	}
-	
+	function LoadYandex ()
+	{
+		if(isset($_POST['upload']))
+		{	
+		$server = 'ssl://webdav.yandex.ru';
+		$port = 443;
+		$user = 'mirrorYNDX';
+		$pass = '';
+		
+		$fp = fsockopen($server, $port, $errno, $errstr, 30);
 
+		if (!$fp) 
+			{
+			echo "$errstr ($errno)<br />\n";
+			} 
+		else 	
+			{
+			// try to open the file ...
+					$filename = $_FILES['uploadFile']['name'];
+					$path = "/".$_FILES['uploadFile']['name'];
+            
+				$out = "PUT / HTTP/1.1";
+				$out .= "Host: webdav.yandex.ru";
+				//$out .= "Connection: Close\r\n\r\n"; //= sprintf('Connection: Keep-Alive');
+				$out .= 'User-Agent: php class webdav_client $Revision: 1.7 $';
+				$out .= 'Authorization: Basic '. base64_encode("$user:$pass");
+				// add more needed header information ...
+ 				$out .= 'Content-length: ' . filesize($filename);
+				$out .= 'Content-type: application/octet-stream';
+				fwrite($fp, $out);
+				while (!feof($fp)) {
+					echo fgets($fp, 128);
+				}
+
+			
+        
+			fclose($fp);
+			}
+
+		}
+	}
+
+
+
+
+	
 }
 	
 	
