@@ -80,42 +80,73 @@ class Loader
 	{
 		if(isset($_POST['upload']))
 		{	
-		$server = 'ssl://webdav.yandex.ru';
-		$port = 443;
-		$user = 'mirrorYNDX';
-		$pass = '';
+		$yaserver = 'https://webdav.yandex.ru';
+		$yauser = 'mirrorYNDX';
+		$yapass = '';
+		$yadir = 'upload_files/';
+		$uploadedFile = $_FILES['uploadFile']['tmp_name'];
+		$fp = fopen($uploadedFile, 'r');
 		
-		$fp = fsockopen($server, $port, $errno, $errstr, 30);
+		//curl --user yandex_login:yandex_password -T file_name_to_upload https://webdav.yandex.ru
+		//echo $uploadedFile;
+		//system ("curl --user $yauser:$yapass -T $uploadedFile https://webdav.yandex.ru/upload_files/");
 
-		if (!$fp) 
-			{
-			echo "$errstr ($errno)<br />\n";
-			} 
-		else 	
-			{
-			// try to open the file ...
-					$filename = $_FILES['uploadFile']['name'];
-					$path = "/".$_FILES['uploadFile']['name'];
-            
-				$out = "PUT / HTTP/1.1";
-				$out .= "Host: webdav.yandex.ru";
-				//$out .= "Connection: Close\r\n\r\n"; //= sprintf('Connection: Keep-Alive');
-				$out .= 'User-Agent: php class webdav_client $Revision: 1.7 $';
-				$out .= 'Authorization: Basic '. base64_encode("$user:$pass");
-				// add more needed header information ...
- 				$out .= 'Content-length: ' . filesize($filename);
-				$out .= 'Content-type: application/octet-stream';
-				fwrite($fp, $out);
-				while (!feof($fp)) {
-					echo fgets($fp, 128);
-				}
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, "https://webdav.yandex.ru:443/upload_files/".$_FILES['uploadFile']['name']);
+		//curl_setopt($ch, CURLOPT_USERPWD, $yauser.":".$yapass);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);   // no verify
 
-			
-        
-			fclose($fp);
-			}
+    
+		$headers = array(
+		'PUT / HTTP/1.1',
+		'Connection: Close\r\n\r\n', 
+		'User-Agent: php class webdav_client $Revision: 1.7 $',
+		'Authorization: Basic '. base64_encode("$yauser:$yapass"),
+		'Content-length: ' . filesize($uploadedFile),
+		'Content-type: application/octet-stream'
+		);
+		curl_setopt($ch, CURLOPT_HTTPHEADER,$headers); 
+
+		curl_setopt($ch, CURLOPT_USERPWD, $yauser . ":" . $yapass);		
+		curl_setopt($ch, CURLOPT_UPLOAD, 1);
+		curl_setopt($ch, CURLOPT_INFILE, $fp);
+		curl_setopt($ch, CURLOPT_INFILESIZE, filesize($uploadedFile));
+
+		curl_exec($ch);
+
+		$error_no = curl_errno($ch);
+		curl_close ($ch);
+		
+        if ($error_no == 0) {
+            echo 'File uploaded succesfully.';
+        } else {
+            echo 'File upload error. '.$error_no ;
+        }
+		fclose($fp);
+// echo phpinfo();
+
+/*
+
+Собсно, что на нужно для счестья на примере яндекса:
+
+curl --user юзер:пароль -o filename.ext https://webdav.yandex.ru/backup/filename.ext
+curl --user юзер:пароль -T filename.ext https://webdav.yandex.ru/backup/
+curl --user юзер:пароль -T {filename.ext,othername.ext} https://webdav.yandex.ru/backup/
+curl --user юзер:пароль --request DELETE https://webdav.yandex.ru/backup/filename.ext
+
+Здесь мы ковыряемся с файлами в папке backup. Согласно манам, при указании папки нужно осталять крайний слэш, стобы curl не терялся в догадках не файл ли это.
+
+Вариант раз - забираем файл из облака. Имя файла указывается два раза - в URL'е (очевидно зачем, да?) и как имя выходного файла, т.к. иначе curl выплюнет файл на stdout.
+
+Варианты два и три - заливаем файл в облако. В первом случае один файл, во втором несколько (и оба реактивные). Вообще, такая обработка нескольких файлов не относится конкретно к webdav, но пусть будет для галочки. Если файл с таким именем уже существует, он молча перезаписывается.
+
+Ну и вариант четыре - удаление файла. Гуглом находятся и команды получения списка файлов, и переименования, но для моей задачи какбэ не требуется.
+		
+*/
+	
 
 		}
+		
 	}
 
 

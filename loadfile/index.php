@@ -11,13 +11,14 @@
  </form>
 <?php
 
+
 include_once('Loader.php');
 include_once('DBInsert.php');
 
 /*obj загрузчик */
 $a = new Loader (GetCWD()."/tmpfolder/", array("gif", "jpeg", "jpg", "png","xls","xlsx","zip"));
 /* загружаем */
-echo $a->loads();
+//echo $a->loads();
 echo '_____ya_____<br>';
 echo $a->LoadYandex();
 
@@ -59,11 +60,11 @@ if ( strlen($dbins->fname) > 0)
 		}
 	
 /* доступные файлы */	
- echo printData ($dbins->prints());
+// echo printData ($dbins->prints());
  
  echo '<hr>';
  /*или так */
- echo printData ($dbins->prints($a->fnewname));
+ //echo printData ($dbins->prints($a->fnewname));
   ?>
 
 </body>
