@@ -13,16 +13,18 @@ include_once('DBInsert.php');
 $a = new Loader (GetCWD()."/tmpfolder/", array("gif", "jpeg", "jpg", "png","xls","xlsx","zip"));
 
 /* загружаем */
-/*if( $a->loads())
+if( $a->loads())
 	{
-	echo '{"success": true, "file": "'. $a->fname .'" }';
+	InsBD ($a);
 	}
 	else 
 	{
     echo '{"success": false}';
 	}
-	*/
-/**/
+	
+/*
+$a = new Loader ('https://webdav.yandex.ru', array("gif", "jpeg", "jpg", "png","xls","xlsx","zip"));
+
 if ( $a->LoadYandex())
 	{
 	echo '{"success": true, "file": "'. $a->fname .'" }';
@@ -31,24 +33,39 @@ if ( $a->LoadYandex())
 	{
     echo '{"success": false}';
 	}
-
+*/
 
 /*obj запись в БД и выборка из БД */
-//$dbins = new DBInsert ($a->fname, $a->ftype, $a->fsize, $a->fnewname, '/tmpfolder/', 'localhost', 'root', '','test');
+function InsBD ($b)
+{
+$orderNum = '7777';
+$dbins = new DBInsert ($b->fname, $b->ftype, $b->fsize, $b->fnewname, $b->folder,$orderNum, '.', 'dvs', '','alert_f');
+
+$res = false;
 
 /*занесем в базу, что загрузили*/
-/*if ( strlen($dbins->fname) > 0) 
+if ( strlen($dbins->fname) > 0) 
 	{ 
-	$dbins->insertDB();
+	$res = $dbins->insertDB();
 	}
-*/	
-/* инфо о загрузке*/
+if ($res)
+	{ /* доступные файлы */
+	$dataurl = printData ($dbins->prints());
+
+	echo '{"success": true, "file": "'. $dbins->fname .'" ,"dataurl": "'. $dataurl .'"}';
+	}
+else 
+	{
+    echo '{"success": false}';
+	}
+	
+}	
 
 	
 /* 
 вывод данных 
 для универсальности разбираем массив тут.*/ 	
-/*	function printData ( $resarray)
+	function printData ( $resarray)
 		{
 		if (sizeof($resarray[0])>1)
 			{
@@ -69,11 +86,7 @@ if ( $a->LoadYandex())
 			return $resarray[0]['err'];
 			}
 		}
-*/	
-/* доступные файлы */	
-// echo printData ($dbins->prints());
+	
  
- echo '<hr>';
- /*или так */
- //echo printData ($dbins->prints($a->fnewname));
+ 
   ?>

@@ -13,13 +13,13 @@
 */
 class Loader 
 {
-	protected $folder; 
+	public $folder; 
 	public $whitelist;
 	public $fname;
 	public $ftype;
 	public $fsize;
 	public $fnewname;
-	
+	public $res; //resultat zagruzki
 	
 	function __construct($folder, $whitelist)
 	{
@@ -85,23 +85,21 @@ class Loader
 	{
 		$yaserver = 'https://webdav.yandex.ru';
 		$yauser = 'mirrorYNDX';
-		$yapass = '';
+		$yapass = 'Dthjybrfnik';
 		$yadir = 'upload_files/';
 		
 		if ($this->noWhitelist($_FILES['uploadFile']['name']))
 		die("Ошибка,  Вы не можете загружать файл этого типа"); 
 		
 		$file_name = $this->newName($_FILES['uploadFile']['name']);
-		//rename($_FILES['uploadFile']['name'],$file_name);
 		
 		$uploadedFile = $_FILES['uploadFile']['tmp_name'];
-		//rename($uploadedFile,$file_name);
 
 		$fp = fopen($uploadedFile, 'r');
 		
 
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, "https://webdav.yandex.ru:443/upload_files/".$_FILES['uploadFile']['name']);
+		curl_setopt($ch, CURLOPT_URL, "https://webdav.yandex.ru:443/upload_files/".$file_name);//$_FILES['uploadFile']['name']);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);   // no verify
  		$headers = array(
 		'PUT / HTTP/1.1',
@@ -116,8 +114,8 @@ class Loader
 		curl_setopt($ch, CURLOPT_UPLOAD, 1);
 		curl_setopt($ch, CURLOPT_INFILE, $fp);
 		curl_setopt($ch, CURLOPT_INFILESIZE, filesize($uploadedFile));
-
-		curl_exec($ch);
+		curl_setopt($ch,  CURLOPT_RETURNTRANSFER, 1);//для возврата результата в $res вдруг пригодится
+		$this->res = curl_exec($ch);
 
 		$error_no = curl_errno($ch);
 
@@ -127,7 +125,7 @@ class Loader
 			$this->setProp ( $file_name);	
             return true;
         } else {
-            return false;//'File upload error. '.$error_no ;
+            return 'File upload error. '.$error_no ;
         }
 		fclose($fp);
 	}
