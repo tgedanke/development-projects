@@ -1,6 +1,6 @@
 Ext.define('LFile.controller.LoadFile', {
     extend: 'Ext.app.Controller',
-	views: ['loadf.Loads'],
+	views: ['loadf.Loads'], 
 
     init: function() {
        this.control({
@@ -11,18 +11,25 @@ Ext.define('LFile.controller.LoadFile', {
 	},
 	doYaload : function (button)
 	{
-	 var form = button.up('form').form;//Ext.widget('loads').getForm();
-                if (form.isValid()) {
-                        form.submit({
+	 var fform = button.up('form').form;//Ext.widget('loads').getForm();
+                if (fform.isValid()) {
+                        fform.submit({
                         url: 'data/upload.php',
-                        waitMsg: 'Загрузка...',
+                        waitMsg: 'Р—Р°РіСЂСѓР·РєР°...',
                         success: function(fp, o){
-                            Ext.Msg.alert('загружено!', 'Файл ' +o.result.file +" загружен");
-                        }
+						    Ext.Msg.alert('Р·Р°РіСЂСѓР¶РµРЅРѕ!', 'Р¤Р°Р№Р» ' +o.result.file +" Р·Р°РіСЂСѓР¶РµРЅ");
+							/*o.result.dataurl in form.fileurl.text*/
+							//Ext.Msg.alert(o.result.dataurl);
+ 							 button.up('form').down('label[itemId=fileurl]').setHtml(o.result.dataurl);
+                       }
                     });
                 }
 	
-	}
+	}/*,
+	setUrl : function (furl)
+	{
+		Ext.widget('loads').getForm().down('label[itemId=fileurl]').setHtml(furl);
+	}*/	
 
 });
 

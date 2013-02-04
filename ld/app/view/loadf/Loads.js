@@ -1,25 +1,32 @@
-Ext.define('LFile.view.loadf.Loads', {
+п»їExt.define('LFile.view.loadf.Loads', {
 	alias : 'widget.loads',
 	extend : 'Ext.form.Panel',
-	//layout : { 		type : 'fit'	},//уедет в центр по высоте
+	//layout : { 		type : 'fit'	},//Р±СѓРґРµС‚ РІ С†РµРЅС‚СЂРµ РїРѕ РіРІРµСЂС‚РёРєР°Р»Рё
     bodyPadding : 10,
-	height : 130,
-	width : 260,
-	renderTo: Ext.getBody(),
+//	height : 130,
+//	width : 260,
+
 	items : [{
  				xtype: 'filefield',
 				name: 'uploadFile',
-				fieldLabel: 'файл',
+				fieldLabel: 'С„Р°Р№Р»',
 				labelWidth: 150,
 				msgTarget: 'side',
 				allowBlank: false,
-				//anchor: '100%',//растянуть
-				buttonText: 'Выбрать...'
+				//anchor: '100%',//СЂР°СЃС‚СЏРЅРµС‚
+				buttonText: 'РІС‹Р±СЂР°С‚СЊ...'
                 
+		},
+		{
+			xtype : 'label',
+			itemId: 'fileurl',
+			//text : ''
+			html : '...'
 		}
+
 	],
 	    buttons: [{
-        text : 'заргузка',
+        text : 'СЃРѕС…СЂР°РЅРёС‚СЊ',
 		action : 'submit',
 		formBind : true
  }]

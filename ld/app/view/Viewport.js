@@ -3,9 +3,7 @@ Ext.define('LFile.view.Viewport', {
 	layout : 'fit',
 	alias : 'widget.lfviewport',
 	requires : [ 'Ext.form.*', 'Ext.ButtonGroup'], //for build
-	items : [{
-    width: 400,
- 
+	items : [{ 
 			xtype : 'loads'
 		}
 	]
