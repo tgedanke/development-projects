@@ -52,6 +52,7 @@ if ($res)
 	{ /* доступные файлы */
 	$dataurl = printData ($dbins->prints());
 
+//	echo '{"success": true, "file": "'. $dataurl .'"}';
 	echo '{"success": true, "file": "'. $dbins->fname .'" ,"dataurl": "'. $dataurl .'"}';
 	}
 else 
@@ -72,13 +73,14 @@ else
 			$inputtxt = '<table>';
 			foreach ($resarray as &$row) 
 				{
-					$inputtxt = $inputtxt . '<tr><td>' . $row['uploadTime']  . '</td>' .
-					'<td>' . $row['autor'] . '</td>'.
-					'<td>' .'<a href="downloadfile.php?fn='.$row['realFileName'].'"   target="_blank">' .$row['autorFileName']. '</a>' . '</td>'.
-					'<td>' .$row['size'] . '</td>'.
+					$inputtxt = $inputtxt . '<tr><td>' . $row['UploadFileTime']  . '</td>' .
+					'<td>' . $row['ROrdNum'] . '</td>'.
+					'<td>' .'<a href="downloadfile.php?fn='.$row['RealFileName'].'"   target="_blank">' .$row['AutorFileName']. '</a>' . '</td>'.
+					'<td>' .$row['FSize'] . '</td>'.
 					'</tr>';
 				}
 			unset($row);
+			//echo $inputtxt;
 			return $inputtxt . '</table>';
 			}
 		else
