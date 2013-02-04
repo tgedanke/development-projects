@@ -65,6 +65,7 @@ class DBInsert
 		$inputvals = array();
 		
 		$query = "exec [dbo].sp_select_AgFiles   @ROrdNum='{$this->orderNum}', @RealFileName='{$this->fnewname}'";
+		
 		$query = iconv("UTF-8", "windows-1251", $query);
 		$result = mssql_query($query);
 		/* проверяем вернулась ли хотя бы 1 строка*/
@@ -72,23 +73,41 @@ class DBInsert
 		{
 			$i = 0;
 			/* вытаскиваем одну за другой строки, помещаем в $row mssql_fetch_assoc($result)  -  строка в виде ассоциативного массива,  mssql_fetch_num - порядковые номера колонок , mssql_fetch_array($result) и то и то			*/
-			while ($row = mssql_fetch_object($result)) 			
-			{
-				$inputvals[$i] = array('UploadFileTime' => $row->UploadFileTime,
-											  'ROrdNum' => $row->ROrdNum,
-										 'realFileName' => iconv("windows-1251", "UTF-8",$row->realFileName) ,
-										'autorFileName' => iconv("windows-1251", "UTF-8",$row->autorFileName),
-												'FSize' => iconv("windows-1251", "UTF-8",$row->FSize),
-											 'IsDelete' => $row->IsDelete);
+			
+	/*	 while ($row = mssql_fetch_array($result, MSSQL_ASSOC)) {
+                    foreach ($row as $f => &$value) {
+						if((($response->fields[$f] == 'char')||($response->fields[$f] == 'text'))&&($value)){
+							$value = iconv("windows-1251", "UTF-8", $value);
+						}
+                    }
+
+                    $response->data[] = array_change_key_case($row);
+                }
+	*/
+			
+			while ($row = mssql_fetch_array($result, MSSQL_ASSOC)) 			
+			{	
+                  foreach ($row as $f => &$value) {
+							$value = iconv("windows-1251", "UTF-8", $value);
+						}
+  
+				$inputvals[$i] = array( "UploadFileTime" => $row["UploadFileTime"],
+									"ROrdNum" => $row["ROrdNum"],
+									"RealFileName" => $row["RealFileName"] ,
+									"AutorFileName" => $row["AutorFilleName"],
+									"FSize" => $row["FSize"],
+									"IsDelete" => $row["IsDelete"]);
 				$i++;
+				
 			}
 		} 
 		else 
 		{
-			$inputvals[0]= array ( 'err' => 'нет данных');
+			$inputvals[0]= array ("err" => "no data");
 		}
 	mssql_close($db);
 	/*возвращаем значение*/
+	
 	return $inputvals;
 	}
 

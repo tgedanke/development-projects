@@ -20,16 +20,12 @@ Ext.define('LFile.controller.LoadFile', {
 						    Ext.Msg.alert('загружено!', 'Файл ' +o.result.file +" загружен");
 							/*o.result.dataurl in form.fileurl.text*/
 							//Ext.Msg.alert(o.result.dataurl);
- 							 button.up('form').down('label[itemId=fileurl]').setHtml(o.result.dataurl);
+ 							fform.down('label[itemId=fileurl]').setHtml(o.result.dataurl);
                        }
                     });
                 }
 	
-	}/*,
-	setUrl : function (furl)
-	{
-		Ext.widget('loads').getForm().down('label[itemId=fileurl]').setHtml(furl);
-	}*/	
+	}
 
 });
 
