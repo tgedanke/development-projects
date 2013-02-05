@@ -17,10 +17,11 @@ Ext.define('LFile.controller.LoadFile', {
                         url: 'data/upload.php',
                         waitMsg: 'Загрузка...',
                         success: function(fp, o){
-						    Ext.Msg.alert('загружено!', 'Файл ' +o.result.file +" загружен");
-							/*o.result.dataurl in form.fileurl.text*/
+						    //Ext.Msg.alert('загружено!', 'Файл ' +o.result.file +" загружен");
+							/*o.result.dataurl in form.fileurl.value displayfield*/
 							//Ext.Msg.alert(o.result.dataurl);
- 							fform.down('label[itemId=fileurl]').setHtml(o.result.dataurl);
+ 							//Ext.form.DisplayField.setHtml(o.result.dataurl);
+							fform.getComponent('itemNumber').setValue('!!!!!');
                        }
                     });
                 }
