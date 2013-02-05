@@ -18,10 +18,10 @@
                 
 		},
 		{
-			xtype : 'label',
-			itemId: 'fileurl',
-			//text : ''
-			html : '...'
+			xtype : 'displayfield',
+			fieldLabel:'url',
+			itemId: 'itemNumber',//name: 'fileurl',
+			value : '...'
 		}
 
 	],

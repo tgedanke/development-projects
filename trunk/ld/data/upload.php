@@ -75,7 +75,7 @@ else
 				{
 					$inputtxt = $inputtxt . '<tr><td>' . $row['UploadFileTime']  . '</td>' .
 					'<td>' . $row['ROrdNum'] . '</td>'.
-					'<td>' .'<a href="downloadfile.php?fn='.$row['RealFileName'].'"   target="_blank">' .$row['AutorFileName']. '</a>' . '</td>'.
+					'<td>' .'<a href="data/downloadfile.php?fn='.$row['RealFileName'].'"   target="_blank">' .$row['AutorFileName']. '</a>' . '</td>'.
 					'<td>' .$row['FSize'] . '</td>'.
 					'</tr>';
 				}
