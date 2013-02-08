@@ -18,18 +18,32 @@
                 
 		},
 		{
+			xtype : 'label',
+			name:'urlf',
+			itemId: 'urlf',//name: 'fileurl',
+			text : ''
+		},
+		{
 			xtype : 'displayfield',
-			fieldLabel:'url',
-			itemId: 'itemNumber',//name: 'fileurl',
-			value : '...'
+			fieldLabel:'',
+			itemId: 'itemNumber',
+			value : ''
 		}
 
 	],
-	    buttons: [{
+	    buttons: [
+		{
         text : 'сохранить',
 		action : 'submit',
 		formBind : true
- }]
+		},
+		{
+		text : 'удалить',
+		action : 'delete',
+		hidden :true
+		//formBind : true
+		}
+	]
 
 });
  

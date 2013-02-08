@@ -8,9 +8,9 @@
  $place место хранения файла
  информация для подключения к БД
  $hostname имя хоста
- $username имя пользователя
- $password пароль
- $udatabase имя базы данных
+ $username имя пользователя DB
+ $password пароль DB
+ $udatabase имя базы данных DB
 
 */	
 class DBInsert
@@ -21,12 +21,13 @@ class DBInsert
 	public $fnewname;
 	public $place;
 	public $orderNum;
+	public $userID;
 	protected $hostname;
 	protected $username;
 	protected $password;
 	protected $udatabase;
 
-	function __construct($fname, $ftype, $fsize, $fnewname, $place,$orderNum, $hostname, $username, $password, $udatabase)
+	function __construct($fname, $ftype, $fsize, $fnewname, $place,$orderNum, $userID, $hostname, $username, $password, $udatabase)
 	{
 		$this->fname = $fname;
 		$this->ftype = $ftype;
@@ -34,6 +35,7 @@ class DBInsert
 		$this->fnewname = $fnewname;
 		$this->place = $place;
 		$this->orderNum = $orderNum;
+		$this->userID = $userID;
 		$this->hostname = $hostname;
 		$this->username = $username;
 		$this->password = $password;
@@ -51,13 +53,49 @@ class DBInsert
 	function insertDB()
 	{
 		$db = $this->connDB();
-		$query = " exec sp_insert_AgFiles  @ROrdNum='{$this->orderNum}', @AutorFilleName='{$this->fname}',@RealFileName='{$this->fnewname}',@FileType='{$this->ftype}',@FileSize='{$this->fsize}',@FilePlase='{$this->place}',@InsUsr='{$_SESSION[xUser]}',@IsDelete=0"; 
+		$query = " exec sp_insert_AgFiles  @ROrdNum='{$this->orderNum}', @AutorFileName='{$this->fname}',@RealFileName='{$this->fnewname}',@FileType='{$this->ftype}',@FileSize='{$this->fsize}',@FilePlase='{$this->place}',@InsUsr='{$this->userID}'"; //@InsUsr='{$_SESSION[xUser]}'
 	    $query = iconv("UTF-8", "windows-1251", $query);
 		$result = mssql_query($query);// true good? false bad
 		mssql_close($db); 
 		return $result ;
 	}
 
+	/*yдаляет данные из табоицы*/
+	function delDB()
+	{
+		$db = $this->connDB();
+		$query = "exec sp_delete_AgFiles @ROrdNum ='{$this->orderNum}', @InsUsr='{$this->userID}',  @RealFileName='{$this->fnewname}'";
+	    $query = iconv("UTF-8", "windows-1251", $query);
+		$result = mssql_query($query);// true good? false bad
+
+	/* проверяем вернулась ли хотя бы 1 строка*/
+		if (mssql_num_rows($result) > 0)
+		{
+			$i = 0;
+			/* вытаскиваем одну за другой строки, помещаем в $row mssql_fetch_assoc($result)  -  строка в виде ассоциативного массива,  mssql_fetch_num - порядковые номера колонок , mssql_fetch_array($result) и то и то			*/
+			while ($row = mssql_fetch_array($result, MSSQL_ASSOC)) 			
+			{	
+                  foreach ($row as $f => &$value) {
+							$value = iconv("windows-1251", "UTF-8", $value);
+						}
+  
+				$inputvals[$i] = array( "RealDelName" => $row["RealDelName"],
+									"AutorDelName" => $row["AutorDelName"],
+									"FilePlase" => $row["FilePlase"]);
+				$i++;
+				
+			}
+		}
+		else 
+		{
+			$inputvals[0]= array ("err" => "no data");
+		}
+		mssql_close($db);
+		
+	return $inputvals ;
+	
+	}
+	
 	/*выбирает данные из таблицы */	
 	function prints()
 	{
@@ -73,18 +111,6 @@ class DBInsert
 		{
 			$i = 0;
 			/* вытаскиваем одну за другой строки, помещаем в $row mssql_fetch_assoc($result)  -  строка в виде ассоциативного массива,  mssql_fetch_num - порядковые номера колонок , mssql_fetch_array($result) и то и то			*/
-			
-	/*	 while ($row = mssql_fetch_array($result, MSSQL_ASSOC)) {
-                    foreach ($row as $f => &$value) {
-						if((($response->fields[$f] == 'char')||($response->fields[$f] == 'text'))&&($value)){
-							$value = iconv("windows-1251", "UTF-8", $value);
-						}
-                    }
-
-                    $response->data[] = array_change_key_case($row);
-                }
-	*/
-			
 			while ($row = mssql_fetch_array($result, MSSQL_ASSOC)) 			
 			{	
                   foreach ($row as $f => &$value) {
@@ -94,12 +120,19 @@ class DBInsert
 				$inputvals[$i] = array( "UploadFileTime" => $row["UploadFileTime"],
 									"ROrdNum" => $row["ROrdNum"],
 									"RealFileName" => $row["RealFileName"] ,
-									"AutorFileName" => $row["AutorFilleName"],
+									"AutorFileName" => $row["AutorFileName"],
 									"FSize" => $row["FSize"],
-									"IsDelete" => $row["IsDelete"]);
+									"InsUsr" => $row["InsUsr"],
+									"FilePlase" => $row["FilePlase"]);
 				$i++;
 				
 			}
+		$this->fname = $inputvals[0]['AutorFileName'];
+		$this->fsize = $inputvals[0]['FSize'];
+		$this->fnewname = $inputvals[0]['RealFileName'];
+		$this->userID = $inputvals[0]['InsUsr'];
+		$this->place = $inputvals[0]['FilePlase'];
+
 		} 
 		else 
 		{

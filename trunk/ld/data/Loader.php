@@ -81,6 +81,11 @@ class Loader
 		$this->fnewname	= $newn;				
 	}
 	
+	function delFile()
+	{
+	
+	return unlink($this->folder.$this->fnewname);
+	}
 	function LoadYandex ()
 	{
 		$yaserver = 'https://webdav.yandex.ru';
