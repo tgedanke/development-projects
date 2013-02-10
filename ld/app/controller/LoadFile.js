@@ -64,35 +64,43 @@ Ext.define('LFile.controller.LoadFile', {
 
 Ext.onReady(function(){
    //Ext.Msg.alert('хидены','призагрузке посмотреть');
-   //aviewport.down('loads');
-   var fform = this.getAdmTool().down('loads');
- 	// var fform = this.down('form');
+   //var fform = this.getViewExForm().getForm();//getAdmTool().down('loads');
+ 	 //var fform = this.getComponent('loads');
+	/* var fform = this.down('loads');
 	 console.log(fform);
 			Ext.Ajax.request(
 			{
                 url: 'data/upload.php',
 				params : {orderNum : '7777', userID : 'webuser', act : 'onl'},
                 //waitMsg: 'loading...',
-                success: function(fp){
-			jData = Ext.decode(fp.responseText); 
+                success: function(fp)
+				{
+				console.log('1111');
+				jData = Ext.decode(fp.responseText); 
 				console.log(jData);
-				if (jData.delbtn=="y") {fform.down('button[action=delete]').show();}
-				else {fform.down('button[action=delete]').hide();}
-				//console.log('22222');
-							fform.down('label[name=urlf]').setText( '<a href="data/downloadfile.php?fn=' + jData.dataurl + '"   target="_blank">'+  o.result.file +'</a>',false);
-							fform.getComponent('itemNumber').setValue('<a href="data/downloadfile.php?fn=' + jData.dataurl + '"   target="_blank">'+  o.result.file +'</a>',false);
-							fform.down('button[action=submit]').hide();
-							fform.down('filefield[name=uploadFile]').hide();
-			   },
-			   failure : function (response) {
-				fform.down('label[name=urlf]').setText('',false);
-				fform.getComponent('itemNumber').setValue('',false);
-				fform.down('button[action=delete]').hide();
-				fform.down('button[action=submit]').show();
-				fform.down('filefield[name=uploadFile]').show();
-				
+				if (jData.delbtn=="y") 
+					{
+					fform.down('button[action=delete]').show();
+					console.log('2222');
+					}
+				else {
+					fform.down('button[action=delete]').hide();
+					console.log('3333');
+					}
+				fform.down('label[name=urlf]').setText( '<a href="data/downloadfile.php?fn=' + jData.dataurl + '"   target="_blank">'+  o.result.file +'</a>',false);
+				fform.getComponent('itemNumber').setValue('<a href="data/downloadfile.php?fn=' + jData.dataurl + '"   target="_blank">'+  o.result.file +'</a>',false);
+				fform.down('button[action=submit]').hide();
+				fform.down('filefield[name=uploadFile]').hide();
+			    },
+			    failure : function (response) {
+					fform.down('label[name=urlf]').setText('',false);
+					fform.getComponent('itemNumber').setValue('',false);
+					fform.down('button[action=delete]').hide();
+					fform.down('button[action=submit]').show();
+					fform.down('filefield[name=uploadFile]').show();
+					console.log('4444');
 				}
-            });
+            });*/
   
    
 }); 
