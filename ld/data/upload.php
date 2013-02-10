@@ -40,33 +40,58 @@ else
 {
 	if ($act == 'del')
 	{
-	$dbins = new DBInsert ('', '', '', '', '', $orderNum, $userID, '.', 'dvs', '','alert_f');
+	$dbins = new DBInsert ('', '', '', '', '', $orderN, $usID, '.', 'dvs', '','alert_f');
 	$res = false;
 	if (( strlen($dbins->orderNum) > 0)&&( strlen($dbins->userID) > 0))
 		{
-		echo '1!';
 		$res = $dbins->delDB();
 		}
 	if ($res)
-		{ 
-		echo '2!';
+		{
 		if (sizeof($res[0])>1)
 			{
-			echo '3!';
 			$a = new Loader (GetCWD()."/tmpfolder/", array("gif", "jpeg", "jpg", "png","xls","xlsx","zip"));
 			$a->fnewname = $res[0]['RealDelName'];
-			//$a->folder = $res[0]['FilePlase'];
 			$del = $a->delFile();
-			echo "{'success': true, 'file': '". $res[0]['AutorDelName'] ."'}";
+			if ($del)
+				{
+				echo "{'success': true, 'file': '". $res[0]['AutorDelName'] ."'}";
+				}
+			else
+				{
+				echo "{'success': false}";
+				}
 			}
 		else {
-		echo '4!';
 			echo "{'success': false}";
 			}
 		}
 	else 
 		{
 		echo "{'success': false}";
+		}
+	}
+	
+	else
+	{
+		if ($act == 'onl')
+		{
+		$dbins = new DBInsert ('', '', '', '', '', $orderN, $usID, '.', 'dvs', '','alert_f');
+		$res = false;
+		if (( strlen($dbins->orderNum) > 0)&&( strlen($dbins->userID) > 0))
+			{
+			$res = $dbins->prints();
+			}
+		if (sizeof($res[0])>1)
+			{
+			$btn =  ($dbins->userID!=$usID)?"n":"y";
+			echo "{'success': true, 'file': '". $dbins->fname.'('.$dbins->fsize.')' ."' ,'dataurl': '". $dbins->fnewname."', 'delbtn':".$btn."}";
+			}
+		else {
+			echo "{'success': false}";
+			}
+		
+		
 		}
 	}
 }		

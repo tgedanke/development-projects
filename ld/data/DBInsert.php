@@ -102,7 +102,7 @@ class DBInsert
 		$db = $this->connDB();
 		$inputvals = array();
 		
-		$query = "exec [dbo].sp_select_AgFiles   @ROrdNum='{$this->orderNum}', @RealFileName='{$this->fnewname}'";
+		$query = "exec [dbo].sp_select_AgFiles   @ROrdNum='{$this->orderNum}'";
 		
 		$query = iconv("UTF-8", "windows-1251", $query);
 		$result = mssql_query($query);
