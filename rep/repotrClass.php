@@ -1,23 +1,23 @@
 <?php
 class field
 {
-public $key; /*Ключ*/
-	public $keyColumn; /*Ключ столбца*/
-	public $fildView; /*Имя поля в представлении*/
-	public $fWidth; /*Ширина столбца*/
-	public $fHeight; /*Высота строки*/
-	public $borderL; /*Граница_л*/
-	public $order;/*Сортировка (0 не сорт, 1 каким по счету в сортировке) */
-	public $group;/*Группировка до 3 полей*/
-	public $fontSize; /*Шрифт размер*/
-	public $nameView;/*Имя представления ( вьюшки с данными)*/
-	public $keyTemplate; /*Ключ шаблона*/
-	public $fColumn; /*Колонка*/
-	public $fRow; /*Строка*/
-	public $borderR; /*Граница_пр*/
-	public $borderB; /*Граница_н*/
-	public $borderT; /*Граница_в*/
-	public $fType;/*Тип_поля (1 шапк, 0 данные из вью, 2 вычисл понле формула) */
+public $key; /*РљР»СЋС‡*/
+	public $keyColumn; /*РљР»СЋС‡ СЃС‚РѕР»Р±С†Р°*/
+	public $fildView; /*РРјСЏ РїРѕР»СЏ РІ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёРё*/
+	public $fWidth; /*РЁРёСЂРёРЅР° СЃС‚РѕР»Р±С†Р°*/
+	public $fHeight; /*Р’С‹СЃРѕС‚Р° СЃС‚СЂРѕРєРё*/
+	public $borderL; /*Р“СЂР°РЅРёС†Р°_Р»*/
+	public $order;/*РЎРѕСЂС‚РёСЂРѕРІРєР° (0 РЅРµ СЃРѕСЂС‚, 1 РєР°РєРёРј РїРѕ СЃС‡РµС‚Сѓ РІ СЃРѕСЂС‚РёСЂРѕРІРєРµ) */
+	public $group;/*Р“СЂСѓРїРїРёСЂРѕРІРєР° РґРѕ 3 РїРѕР»РµР№*/
+	public $fontSize; /*РЁСЂРёС„С‚ СЂР°Р·РјРµСЂ*/
+	public $nameView;/*РРјСЏ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёСЏ ( РІСЊСЋС€РєРё СЃ РґР°РЅРЅС‹РјРё)*/
+	public $keyTemplate; /*РљР»СЋС‡ С€Р°Р±Р»РѕРЅР°*/
+	public $fColumn; /*РљРѕР»РѕРЅРєР°*/
+	public $fRow; /*РЎС‚СЂРѕРєР°*/
+	public $borderR; /*Р“СЂР°РЅРёС†Р°_РїСЂ*/
+	public $borderB; /*Р“СЂР°РЅРёС†Р°_РЅ*/
+	public $borderT; /*Р“СЂР°РЅРёС†Р°_РІ*/
+	public $fType;/*РўРёРї_РїРѕР»СЏ (1 С€Р°РїРє, 0 РґР°РЅРЅС‹Рµ РёР· РІСЊСЋ, 2 РІС‹С‡РёСЃР» РїРѕРЅР»Рµ С„РѕСЂРјСѓР»Р°) */
 
 	function __construct($key,$keyColumn,$fildView,$fWidth,$fHeight,$borderL,$order,$group,$fontSize,$nameView,$keyTemplate,$fColumn,$fRow,$borderR,$borderB,$borderT,$fType)
 	{
@@ -40,7 +40,10 @@ public $key; /*Ключ*/
 		$this->fType = $fType;
 	}
 }
-
+  
+require_once 'Spreadsheet/Excel/Writer.php';
+  
+  
 function connDB()
 {
 	$db_user = "AIS_MUNAS";
@@ -56,7 +59,7 @@ function initClass($keys)
 {
 $repmass = array();
 	$db = connDB();
-	$query = "select * from REPORTS t where KEY = {$keys}";
+	$query = "select * from REPORTS t where KEY_TEMPLATE = {$keys} order by KEY_COLUMN ";
 	$result = oci_parse($db, $query);
 	oci_execute($result);
 	$i=0;
@@ -71,11 +74,12 @@ $repmass = array();
 return $repmass;	
 }
 	
-function getDataView($in)
+function getDataView($in,$fv)
 {
 	$db = connDB();
 	$datavals = array();
-	$query = "select * from {$in} v";
+	$query = "select {$fv} from {$in} v";
+	//echo $query;
 	$result = oci_parse($db, $query);
 	oci_execute($result);
 	$i=0;
@@ -92,34 +96,68 @@ function getDataView($in)
 	oci_close($db);	
 	return $datavals;
 }
-/*собираем данные для отчета*/
-$keys = 1;
+
+/*СЃРѕР±РёСЂР°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚С‡РµС‚Р°*/
+$keys = 0;
 $resArray = initClass($keys);
 $resArrayData = array();
 $i=0;
 foreach ($resArray as $item)
-{
-$resArrayData[$i] = getDataView($item->nameView);
-$i++;
-}
-/*пока просмотр*/
-echo '---------------<br>';
-$i=0;
+	{
+	//echo $item->nameView;
+		$resArrayData[$i] = array();
+		if ($item->fType == 1)
+		{
+			$resArrayData[$i] = getDataView($item->nameView,$item->fildView );
+		}
+	$i++;
+	}
+/*РїРёС€РµРј РІ СЌРєСЃРµР»СЊ*/
+// Creating a workbook
+$workbook = new Spreadsheet_Excel_Writer();
+$workbook->setTempDir(ini_get('upload_tmp_dir'));
+// sending HTTP headers
+$workbook->send('РћС‚С‡РµС‚.xls');
+// Creating a worksheet
+$worksheet =& $workbook->addWorksheet('РћС‚С‡РµС‚');
+// The actual data
+//$worksheet->write(0, 0, 'РћС‚С‡РµС‚');
+$r = 0;//РїРёС€РµРј РІ СЌС‚Сѓ СЃС‚СЂРѕРєСѓ
+$c = 0;//Рё СЌС‚Сѓ РєРѕР»РѕРЅРєСѓ
+$i = 0;
 	foreach ($resArray as $item)
 	{
-		echo $item->nameView . '<hr>';
-		
+		if ($item->fType == 0)
+		{
+		//echo '<hr>' . $item->fildView . '<br>';// name
+		$r=0;
+		$c++;
+		$worksheet->write($r, $c, iconv( "UTF-8", "windows-1251", $item->fildView ) );
+		$r++;
+		}
+		if ($item->fType == 1)
+		{
 			foreach ($resArrayData[$i]  as $data => $mass)
 			{
-				echo '<br>';
+
 				foreach ($mass  as $element => $vals)
 				{
-					echo $vals . '|';
+					//echo iconv( "UTF-8", "windows-1251", $vals ). '|';
+					$worksheet->write($r, $c, iconv( "UTF-8", "windows-1251", $vals ));
+					$r++;
 				}
 			}
+		}
+		if ($item->fType == 2)
+		{
+		}	
 		$i++;
 	}
-echo '<br>---------------';
+
+
+
+$workbook->close();
+
 
 
  
