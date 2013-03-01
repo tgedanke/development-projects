@@ -1,4 +1,5 @@
 <?php
+//header("Content-type: text/plain; charset=utf-8"); 
 class field
 {
 public $key; /*Ключ*/
@@ -42,7 +43,7 @@ public $key; /*Ключ*/
 }
   
 require_once 'Spreadsheet/Excel/Writer.php';
-  
+ 
   
 function connDB()
 {
@@ -78,17 +79,15 @@ function getDataView($in,$fv)
 {
 	$db = connDB();
 	$datavals = array();
-	$query = "select {$fv} from {$in} v";
-	//echo $query;
+	$query = "select {$fv} from {$in}";
 	$result = oci_parse($db, $query);
 	oci_execute($result);
 	$i=0;
-	while ($row = oci_fetch_array($result, OCI_BOTH))
+	while ($row = oci_fetch_array($result, OCI_NUM))
 		{ $j=0;
 			foreach ($row as $item)
 			{
-			$datavals[$i][$j] = ($item !== null ? htmlentities($item, ENT_QUOTES) : "");
-			
+			$datavals[$i][$j] = $item;
 			$j++;
 			}
 		$i++;	
@@ -119,42 +118,60 @@ $workbook->setTempDir(ini_get('upload_tmp_dir'));
 // sending HTTP headers
 $workbook->send('Отчет.xls');
 // Creating a worksheet
-$worksheet =& $workbook->addWorksheet('Отчет');
-// The actual data
-//$worksheet->write(0, 0, 'Отчет');
-$r = 0;//пишем в эту строку
+$worksheet =& $workbook->addWorksheet(iconv( "UTF-8", "windows-1251",'Отчет'));
+
+// The format data
+$format_d = array();// The format data
+$r = 0;//пишем в эту строку не с 0, для красоты, отступ $o
+$o = 1;// отступ 
 $c = 0;//и эту колонку
 $i = 0;
+$maxr=0;//кол-во строк, без учета заголовка
 	foreach ($resArray as $item)
 	{
+	//задаем стили для данного объекта
+	$format_d[$i] =& $workbook->addFormat();
+	$format_d[$i]->setLeft($item->borderL);//Граница_л
+	$format_d[$i]->setTop($item->borderT);//Граница_в
+	$format_d[$i]->setBottom($item->borderB);//Граница_н
+	$format_d[$i]->setRight($item->borderR);//Граница_пр
+	$format_d[$i]->setSize($item->fontSize);//Шрифт размер
+	
 		if ($item->fType == 0)
 		{
-		//echo '<hr>' . $item->fildView . '<br>';// name
-		$r=0;
+		$r=$o;
 		$c++;
-		$worksheet->write($r, $c, iconv( "UTF-8", "windows-1251", $item->fildView ) );
+		$item->fWidth = round(8.43*$item->fWidth/64);//тк в табличке ширина столбца в пикселах, а в екселе в пунктах, при том, что 8,43 пункта = 64 пикселя, переведем в пункты
+	$worksheet->setColumn($c,$c,$item->fWidth);//Ширина столбца
+		$worksheet->setRow($r,$item->fHeight); //Высота строки
+		$worksheet->write($r, $c, iconv( "UTF-8", "windows-1251", $item->fildView ),$format_d[$i] );
 		$r++;
 		}
 		if ($item->fType == 1)
 		{
+			$cc=0;
 			foreach ($resArrayData[$i]  as $data => $mass)
 			{
-
 				foreach ($mass  as $element => $vals)
-				{
-					//echo iconv( "UTF-8", "windows-1251", $vals ). '|';
-					$worksheet->write($r, $c, iconv( "UTF-8", "windows-1251", $vals ));
+				{ 
+					$worksheet->write($r, $c, iconv( "UTF-8", "windows-1251", $vals ),$format_d[$i]);
+					$worksheet->setRow($r,$item->fHeight); //Высота строки
 					$r++;
 				}
+				$cc++;
 			}
+			$maxr = ($maxr > $cc)? $maxr : $cc;
 		}
 		if ($item->fType == 2)
 		{
+		$vl=iconv( "UTF-8", "windows-1251", $item->fildView );
+		$worksheet->write($r, $item->fColumn, ((strtolower($vl)!= 'count')? $vl :$maxr ),$format_d[$i] );
+		$worksheet->setRow($r,$item->fHeight); //Высота строки
+		
+		if($item->fColumn > 1){$r++;}
 		}	
 		$i++;
 	}
-
-
 
 $workbook->close();
 
