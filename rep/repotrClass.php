@@ -139,19 +139,26 @@ $maxr=0;//кол-во строк, без учета заголовка
 	
 		if ($item->fType == 0)
 		{
-		$r=$o;
-		$c++;
-		$item->fWidth = round(8.43*$item->fWidth/64);//тк в табличке ширина столбца в пикселах, а в екселе в пунктах, при том, что 8,43 пункта = 64 пикселя, переведем в пункты
-	$worksheet->setColumn($c,$c,$item->fWidth);//Ширина столбца
-		$worksheet->setRow($r,$item->fHeight); //Высота строки
-		$worksheet->write($r, $c, iconv( "UTF-8", "windows-1251", $item->fildView ),$format_d[$i] );
-		$r++;
+			$r=$o;
+			$c++;
+			$item->fWidth = round(8.43*$item->fWidth/64);//тк в табличке ширина столбца в пикселах, а в екселе в пунктах, при том, что 8,43 пункта = 64 пикселя, переведем в пункты
+			$worksheet->setColumn($c,$c,$item->fWidth);//Ширина столбца
+			$worksheet->setRow($r,$item->fHeight); //Высота строки
+			$worksheet->write($r, $c, iconv( "UTF-8", "windows-1251", $item->fildView ),$format_d[$i] );
+			$colGroup = (int)$item->fgroup;//надо ли группировать?
+			if ($colGroup > 1)//растянем шапку на нужное кол-во столбцов
+				{
+				$worksheet->mergeCells ($r,$c,$r+$colGroup,$c);
+				}
+			$r++;
 		}
 		if ($item->fType == 1)
 		{
 			$cc=0;
+			$r=($r>$o+1)?($o+1):$r;
 			foreach ($resArrayData[$i]  as $data => $mass)
 			{
+			$worksheet->setColumn($c,$c,$item->fWidth);//Ширина столбца
 				foreach ($mass  as $element => $vals)
 				{ 
 					$worksheet->write($r, $c, iconv( "UTF-8", "windows-1251", $vals ),$format_d[$i]);
