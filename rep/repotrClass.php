@@ -155,7 +155,7 @@ $maxr=0;//кол-во строк, без учета заголовка
 		if ($item->fType == 1)
 		{
 			$cc=0;
-			$r=($r>$o+1)?($o+1):$r;
+			if($r>$o+1){$r=$o+1; $c++;}//$r=($r>$o+1)?($o+1):$r;
 			foreach ($resArrayData[$i]  as $data => $mass)
 			{
 			$worksheet->setColumn($c,$c,$item->fWidth);//Ширина столбца
