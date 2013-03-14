@@ -67,7 +67,7 @@ $repmass = array();
 	while ($row = oci_fetch_array($result, OCI_ASSOC))
 		{
 		$repmass[$i] = new field ($keys, $row["KEY_COLUMN"], $row["FIELD_VIEW"], $row["F_WIDTH"], $row["F_HEIGHT"],
-		$row["BORDER_L"], $row["T_ORDER"], $row["T_GROUP"], $row["FONT_SIZE"], $row["NAME_VIEW"], $row["KEY_TEMPLATE"], 
+		$row["BORDER_L"], $row["ORDER"], $row["GROUP"], $row["FONT_SIZE"], $row["NAME_VIEW"], $row["KEY_TEMPLATE"], 
 		$row["F_COLUMN"],$row["F_ROW"],$row["BORDER_R"],$row["BORDER_B"],$row["BORDER_T"],$row["F_TYPE"]);
 		$i++;	
 		} 
@@ -140,7 +140,7 @@ $res=forGroupAndOrder ($resArray);
 $groups = $res[0];
 $orders = $res[1];
 $groupdata[0]=$res[2];
-	
+$groupdata[1]=array();	
 $i=0;
 foreach ($resArray as $item)
 	{
@@ -211,12 +211,12 @@ $maxr=0;//кол-во строк, без учета заголовка для в
 	$format_d[$i]->setRight($item->borderR);//Граница_пр
 	$format_d[$i]->setSize($item->fontSize);//Шрифт размер
 	$cc=0;
+	$item->fWidth = round(8.43*$item->fWidth/64);//тк в табличке ширина столбца в пикселах, а в екселе в пунктах, при том, что 8,43 пункта = 64 пикселя, переведем в пункты
 	
 		if ($item->fType == 0)//шапка таблички
 		{
 			$r=$o;
 			$c++;
-			$item->fWidth = round(8.43*$item->fWidth/64);//тк в табличке ширина столбца в пикселах, а в екселе в пунктах, при том, что 8,43 пункта = 64 пикселя, переведем в пункты
 			$item->fWidth = ($item->fWidth >= (strlen($item->fildView)+10))? $item->fWidth :(strlen($item->fildView)+10);//на случай, если текст длиннее +зазор 10 букв
 			$worksheet->setColumn($c,$c,$item->fWidth);//Ширина столбца
 			$worksheet->setRow($r,$item->fHeight); //Высота строки
@@ -230,10 +230,11 @@ $maxr=0;//кол-во строк, без учета заголовка для в
 		}
 		if (($item->fType == 1)&&((int)$item->group == 0))//данные кроме столбцов группировки
 		{
-			if($r>$o+1){$r=$o+1; }
-			$worksheet->setColumn($c,$c,$item->fWidth);//Ширина столбца
+			if($r>$o+1){$r=$o+1; $c++;}
 				foreach ($resArrayData[$i]  as $element => $vals)
 				{ 
+			$item->fWidth = ($item->fWidth >= (strlen($vals)+10))? $item->fWidth :(strlen($vals)+10);//на случай, если текст длиннее +зазор 10 букв
+			$worksheet->setColumn($c,$c,$item->fWidth);//Ширина столбца
 					$worksheet->write($r, $c, iconv( "UTF-8", "windows-1251", $vals ),$format_d[$i]);
 					$worksheet->setRow($r,$item->fHeight); //Высота строки
 					if (!in_array (($r-$o-1),$groupdata[1])){$cc ++;}//считаем строки в кахдом столбце. проверка является ли данная строка группир. -отступ и -1 - из-за заголовка
