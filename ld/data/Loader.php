@@ -20,9 +20,9 @@ class Loader
 	public $fsize;
 	public $fnewname;
 	public $res; //resultat zagruzki
-	
+/*1 из 2 изменения от 17 марта*/
 	public $maxUploadFileSize;
-	
+/* конец 1 из 2 изменения от 17 марта*/
 	function __construct($folder, $whitelist)
 	{
 		$this->folder = $folder;
@@ -47,15 +47,15 @@ class Loader
 	/* загружает файл на диск, возвращает статус загрузки*/
 	function loads()
 	{	
-	
-	$maxUploadFileSize=((int)$maxUploadFileSize>0)?((int)$maxUploadFileSize):(ini_get('file_uploads'));
+/*2 из 2 изменения от 17 марта*/
+	$this->maxUploadFileSize=((int)$this->maxUploadFileSize>0)?((int)$this->maxUploadFileSize):(ini_get('file_uploads'));
 	
 	if ($this->noWhitelist($_FILES['uploadFile']['name']))
 		{return -1;}
 		
 	$this->fsize = $_FILES['uploadFile']['size'];
 	
-	if (round((int)$this->fsize/1024) > round((int)$maxUploadFileSize/1024))
+	if ((int)$this->fsize > (int)$this->maxUploadFileSize)
 		{return -2;}
 		
 		/*$uploadedFile путь для загрузки + имя файла*/
@@ -82,7 +82,7 @@ class Loader
 			return -4;  
 		}
 	}
-	
+/*конец 2 из 2 изменения от 17 марта*/
 	function setProp ($newn)
 	{
 		$this->fname = $_FILES['uploadFile']['name'];
