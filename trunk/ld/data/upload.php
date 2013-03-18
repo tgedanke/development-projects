@@ -16,13 +16,27 @@ if ($act == 'ins')
 	/*obj загрузчик */
 	$a = new Loader (GetCWD()."/tmpfolder/", array("gif", "jpeg", "jpg", "png","xls","xlsx","zip"));
 	/* загружаем */
-	if( $a->loads())
+	$a->maxUploadFileSize = 1024*1024*2;//размер загружаемого файла в байтах !!!!
+	$res=$a->loads();
+	$msg='';
+	if( $res >0)
 		{
 		InsBD ($a,$orderN,$usID);
 		}
 		else 
 		{
-		echo '{"success": false}';
+		switch ($res) {
+      case -1:
+          $msg = "файлы этого типа загружать зпрещено";
+		  break;
+      case -2:
+          $msg =  "превышен размер файла " . $a->maxUploadFileSize ."<".$a->fsize;
+		  break;
+      default:
+          $msg =  "ошибка загрузки";
+	}
+		
+		echo "{'success': false, 'res':'".$msg."'}";
 		}
 	/*
 	$a = new Loader ('https://webdav.yandex.ru', array("gif", "jpeg", "jpg", "png","xls","xlsx","zip"));
@@ -59,16 +73,16 @@ else
 				}
 			else
 				{
-				echo "{'success': false}";
+				echo "{'success': false, 'res':''}";
 				}
 			}
 		else {
-			echo "{'success': false}";
+			echo "{'success': false, 'res':''}";
 			}
 		}
 	else 
 		{
-		echo "{'success': false}";
+		echo "{'success': false, 'res':''}";
 		}
 	}
 	
@@ -88,7 +102,7 @@ else
 			echo "{'success': true, 'file': '". $dbins->fname.'('.$dbins->fsize.')' ."' ,'dataurl': '". $dbins->fnewname."', 'delbtn':".$btn."}";
 			}
 		else {
-			echo "{'success': false}";
+			echo "{'success': false, 'res':''}";
 			}
 		
 		
