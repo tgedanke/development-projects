@@ -22,15 +22,16 @@ Ext.define('LFile.controller.LoadFile', {
                         waitMsg: 'Загрузка...',
                         success: function(fp, o){
 						    Ext.Msg.alert('загружено!', 'Файл ' +o.result.file +" загружен");
-							/*o.result.dataurl in form.fileurl.value displayfield*/
-							//console.log(o.result.dataurl );
 							fform.down('label[name=urlf]').setText( '<a href="data/downloadfile.php?fn=' + o.result.dataurl + '"   target="_blank">'+  o.result.file +'</a>',false);
 							fform.getComponent('itemNumber').setValue('<a href="data/downloadfile.php?fn=' + o.result.dataurl + '"   target="_blank">'+  o.result.file +'</a>',false);
 							fform.down('button[action=delete]').show();
 							fform.down('button[action=submit]').hide();
 							fform.down('filefield[name=uploadFile]').hide();
 							
-					   }
+					   },
+					   failure : function (fp,o) {
+					Ext.Msg.alert('ошибка загрузки!', o.result.res);
+					}
                     });
                 }
 	
