@@ -28,10 +28,10 @@ Ext.define('LFile.controller.LoadFile', {
 							fform.down('button[action=submit]').hide();
 							fform.down('filefield[name=uploadFile]').hide();
 							
-					   },
+					   },/*изменения от 17 марта*/
 					   failure : function (fp,o) {
 					Ext.Msg.alert('ошибка загрузки!', o.result.res);
-					}
+					}/*конец изменения от 17 марта*/
                     });
                 }
 	

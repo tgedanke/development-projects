@@ -1,15 +1,15 @@
 <?php
+	include_once('Loader.php');
+	include_once('DBInsert.php');
+	/*если загрузка на сервере запрещена, разрешим*/
+	if (!ini_get('file_uploads')) 	{	ini_set('file_uploads', '1');
+		}
 
-include_once('Loader.php');
-include_once('DBInsert.php');
-/*если загрузка на сервере запрещена, разрешим*/
-if (!ini_get('file_uploads')) 	{	ini_set('file_uploads', '1');
-	}
-
-$orderN = $_POST['orderNum'];
-$usID = $_POST['userID'];
-$act = $_POST['act'];	
-	
+	$orderN = $_POST['orderNum'];
+	$usID = $_POST['userID'];
+	$act = $_POST['act'];	
+/*изменения от 17 марта*/
+	$msg =  "ошибка";
 
 if ($act == 'ins')
 {
@@ -18,7 +18,6 @@ if ($act == 'ins')
 	/* загружаем */
 	$a->maxUploadFileSize = 1024*1024*2;//размер загружаемого файла в байтах !!!!
 	$res=$a->loads();
-	$msg='';
 	if( $res >0)
 		{
 		InsBD ($a,$orderN,$usID);
@@ -30,7 +29,7 @@ if ($act == 'ins')
           $msg = "файлы этого типа загружать зпрещено";
 		  break;
       case -2:
-          $msg =  "превышен размер файла " . $a->maxUploadFileSize ."<".$a->fsize;
+          $msg =  "превышен допустимый размер файла: " . round($a->maxUploadFileSize/1024,2) ."кб. (размер файла: ".round($a->fsize/1024,2) ."кб.)";
 		  break;
       default:
           $msg =  "ошибка загрузки";
@@ -54,6 +53,7 @@ else
 {
 	if ($act == 'del')
 	{
+	$msg =  "ошибка удаления.";
 	$dbins = new DBInsert ('', '', '', '', '', $orderN, $usID, '.', 'dvs', '','alert_f');
 	$res = false;
 	if (( strlen($dbins->orderNum) > 0)&&( strlen($dbins->userID) > 0))
@@ -73,16 +73,16 @@ else
 				}
 			else
 				{
-				echo "{'success': false, 'res':''}";
+				echo "{'success': false, 'res':'".$msg."'}";
 				}
 			}
 		else {
-			echo "{'success': false, 'res':''}";
+			echo "{'success': false, 'res':'".$msg."'}";
 			}
 		}
 	else 
 		{
-		echo "{'success': false, 'res':''}";
+		echo "{'success': false, 'res':'".$msg."'}";
 		}
 	}
 	
@@ -102,17 +102,11 @@ else
 			echo "{'success': true, 'file': '". $dbins->fname.'('.$dbins->fsize.')' ."' ,'dataurl': '". $dbins->fnewname."', 'delbtn':".$btn."}";
 			}
 		else {
-			echo "{'success': false, 'res':''}";
+		echo "{'success': false, 'res':'".$msg."'}";
 			}
-		
-		
 		}
 	}
-}		
-
-		
-		
-		
+}				
 	/*obj запись в БД и выборка из БД */
 function InsBD ($b,$orderNum,$userID)
 {
@@ -132,14 +126,15 @@ function InsBD ($b,$orderNum,$userID)
 			echo "{'success': true, 'file': '". $dbins->fname.'('.$dbins->fsize.')' ."' ,'dataurl': '". $dbins->fnewname."'}";
 			}
 		else {
-			echo "{'success': false}";
+		echo "{'success': false, 'res':'".$msg."'}";
 			}
 		}
 	else 
 		{
-		echo "{'success': false}";
+		echo "{'success': false, 'res':'".$msg."'}";
 		}
 }	
+/* конец изменения от 17 марта*/		
 
 
  
