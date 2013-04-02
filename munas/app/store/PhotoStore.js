@@ -1,6 +1,6 @@
-Ext.define('Munas.store.ContStore', {
+Ext.define('Munas.store.PhotoStore', {
 	extend : 'Ext.data.Store',
-	model : 'Munas.model.ContMod',
+	model : 'Munas.model.PhotoMod',
 	//autoLoad : true,
 	proxy : {
 		type : 'ajax',
@@ -11,7 +11,7 @@ Ext.define('Munas.store.ContStore', {
 			root : 'data'
 		},
 		extraParams : {
-			dbAct : 'getContacts'
+			dbAct : 'getPhoto'
 		}
 	}
 });

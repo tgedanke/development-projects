@@ -1,10 +1,11 @@
 Ext.define('Munas.store.EventStore', {
 	extend : 'Ext.data.Store',
 	model : 'Munas.model.EventMod',
-	//autoLoad : true,
+	remoteFilter: true,
 	proxy : {
-		type : 'ajax',
+		type : 'ajax',		
 		url : 'data/data.php',
+		actionMethods: 'POST',
 		reader : {
 			type : 'json',
 			root : 'data'

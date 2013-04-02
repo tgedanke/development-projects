@@ -1,6 +1,6 @@
 Ext.application({
 	name : 'Munas',
-	controllers : ['Loginform', 'Directorys', 'Security', 'Main', 'DateAdd', 'DateView', 'Reports', 'Event'],	
+	controllers : ['Loginform', 'Directorys', 'Security', 'Main', 'DateAdd', 'DateView', 'Reports', 'Event', 'Photo'],	
 	autoCreateViewport : false,
 	launch: function() {
 		//defaults settings

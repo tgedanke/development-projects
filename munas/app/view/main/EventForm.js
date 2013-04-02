@@ -60,6 +60,23 @@ Ext.define('Munas.view.main.EventForm', {
 				}, {
 					xtype : 'checkboxfield',
 					inputValue : '1',
+					name : 'kids',
+					fieldLabel : 'Детям'
+				}, {
+					xtype : 'combobox',
+					//disabled : true,
+					width : 360,
+					name : 'key_age_limit',
+					displayField : 'name',
+					valueField : 'key',
+					queryMode : 'local',
+					store : 'AgeStore',
+					//allowBlank : false,
+					forceSelection : true,
+					fieldLabel : 'Возраст'
+				},{
+					xtype : 'checkboxfield',
+					inputValue : '1',
 					name : 'canceled',
 					fieldLabel : 'Отменено'
 				}, {
@@ -121,7 +138,7 @@ Ext.define('Munas.view.main.EventForm', {
 				}, {
 					xtype : 'addclassgrid',
 					width : 300,
-					height : 147
+					height : 196
 				}
 			]
 		}

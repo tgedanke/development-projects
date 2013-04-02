@@ -5,6 +5,7 @@ Ext.define('Munas.store.DateStore', {
 	proxy : {
 		type : 'ajax',
 		url : 'data/data.php',
+		actionMethods: 'POST',
 		reader : {
 			type : 'json',
 			root : 'data'

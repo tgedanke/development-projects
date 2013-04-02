@@ -22,6 +22,12 @@ Ext.define('Munas.model.EventMod', {
 			name : 'key_reason_cancel'
 		}, {
 			name : 'description'
+		}, {
+			name : 'photo'
+		}, {
+			name : 'kids'
+		}, {
+			name : 'key_age_limit'
 		}
 	]
 });

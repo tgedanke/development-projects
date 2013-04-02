@@ -16,6 +16,9 @@
 .event-del {
     background-image: url( ../../resources/images/remove.png );
 }
+.photo {
+    background-image: url( ../../resources/images/photo.png );
+}
 .event-view {
     background-image: url( ../../resources/images/note.png );
 }
@@ -61,4 +64,10 @@
 	height : 16px;
 	width : 16px;
 	
+}
+.gray{
+    color: #929292;
+	letter-spacing: 0;
+	/*margin-left: 10px;*/
+	font-size: .8em;
 }

@@ -1,5 +1,5 @@
 <?php
-//завязка
+require_once "secureCheck.php";
 session_start();
 header("Content-type: text/plain; charset=utf-8");
 error_reporting(0);
@@ -10,20 +10,18 @@ class Response
 }
 $response = new Response();
 
-//кульминация
-
-if (!isset($_REQUEST['dbAct'])) {
+if (!isset($_POST['dbAct'])) {
     $response->msg = 'совсем не правильный запрос';
 } else {
-    $dbAct = $_REQUEST['dbAct'];
-    //в case нужно сформировать строку sql запроса $query
-    //если нужен paging установить $paging = true
-    //можно задать сообщение, которое вернуть при успехе $response->msg = 'успех'
-
+    $dbAct = $_POST['dbAct'];
     $response->msg = 'ok';
 	
     switch ($dbAct) {
-        
+	
+        case 'getAgeLimit':
+			$query = "select * from table(F_SELECT_S_AGE_LIMIT())";		
+			
+			break;
 		case 'getContacts':
                $query = "select * from table ( F_SELECT_S_CONTACTS() )";
             break;		
@@ -31,13 +29,9 @@ if (!isset($_REQUEST['dbAct'])) {
                 $query = "select * from table ( F_SELECT_S_USERS() )";
             break;	
 		case 'getRoles':
-				$key_user=$_REQUEST[key_user] ? $_REQUEST[key_user] : 0;
+				$key_user=$_POST[key_user] ? $_POST[key_user] : 0;
                 $query = "select * from table(F_SELECT_S_ROLES({$key_user}))";
-			break;
-		case 'setUsers':
-				//$disable=$_POST[is_disable] ? $_POST[is_disable] : 0;
-				//$query = "exec SP_S_USERS @USER_NAME='{$_POST[user_name]}', @LOGIN='{$_POST[login]}', @PASSWORD='{$_POST[password]}', @IS_DISABLE={$disable}";
-			break;	
+			break;			
         case 'getState':
                 $query = "select * from table(F_SELECT_S_CULTURAL_STATE())";
             break;
@@ -45,110 +39,98 @@ if (!isset($_REQUEST['dbAct'])) {
 				$query = "select * from table(F_SELECT_S_CLASS_EVENT())";
 			break;
 		case 'getEvent':
+				
 				$key =$_SESSION['user_key'];
 				$d = explode('.', date('d.m.Y'));				
-				$date_start=$_REQUEST[date_start] ? $_REQUEST[date_start] : strftime('%d.%m.%Y', mktime(0,0,0, $d[1], '01', $d[2]) );
+				$date_start=$_POST[date_start] ? $_POST[date_start] : strftime('%d.%m.%Y', mktime(0,0,0, $d[1], '01', $d[2]) );
 				$l = explode('.', $date_start);
 				if ($l[1]=='00'){
 				$query = "select * from table(F_SELECT_CULTURAL_EVENT('all', {$key}))";
 				} else {
 				$query = "select * from table(F_SELECT_CULTURAL_EVENT('{$date_start}', {$key}))";
-				}
-				//echo $query;
+				};
+				if(isset($_POST['filter'])){
+				$query = "select * from table(F_SELECT_FILTER_EVENT('all', {$key}))";
+				$paging = true;
+				};				
 			break;
 		case 'getPlace':
-				$key_state = $_REQUEST['key_state'] ? $_REQUEST['key_state'] : -1;
+				$key_state = $_POST['key_state'] ? $_POST['key_state'] : -1;
 				$query = "select * from table(F_SELECT_S_PLACES({$key_state}))";
 			break;
 		case 'getDate':
-				$key_event=$_REQUEST[key_event] ? $_REQUEST[key_event] : 0;
+				$key_event=$_POST[key_event] ? $_POST[key_event] : 0;
                 $query = "select * from table(F_SELECT_DATE_EVENT({$key_event}))";
 			break;
 		case 'getReason':				
                 $query = "select * from table(F_SELECT_S_REASON_CANCEL())";
 			break;		
 		case 'getClassEvent':
-			$key_event=$_REQUEST[key_event];
+			$key_event=$_POST[key_event];
 			$query = "select * from table(F_SELECT_S_EVENT_IN_CLASS({$key_event}))";            
 			break;
 		case 'getStreet':			  
 			$query = "select * from table(F_SELECT_S_STREET())";
 			break;
 		case 'getHouse':
-			$key=$_REQUEST[key] ? $_REQUEST[key] : 0;
+			$key=$_POST[key] ? $_POST[key] : 0;
 			$query = "select * from table(F_SELECT_S_HOUSE({$key}))";
 			break;
 		case 'getStreetHouse':			
-			$key_house = $_REQUEST[key_house];
-			$key_street = $_REQUEST[key_street];
+			$key_house = $_POST[key_house];
+			$key_street = $_POST[key_street];
 			$query = "select * from table(F_SELECT_S_STREET_HOUSE({$key_house}, {$key_street}))";
 			break;
 		case 'getAns':
 			$query = "select * from table(F_SELECT_S_ANSWERABLES())";
 			break;	
 		case 'getHist':
-			$key_event=$_REQUEST[key_event] ? $_REQUEST[key_event] : 0;
+			$key_event=$_POST[key_event] ? $_POST[key_event] : 0;
             $query = "select * from table(F_SELECT_H_DATE_EVENT({$key_event}))";
 			break;
-		/*case 'GetWbsTotal':
-			$ag = $_REQUEST['newAgent'] ? $_REQUEST['newAgent'] : $_SESSION['xAgentID'];
-			if (!empty($_SESSION['AdmAgentID'])) {$ag =$_SESSION['AdmAgentID'];}
-			$query = "exec wwwGetWbsTotal @dir='{$_POST[dir]}', @period='{$_POST[period]}',  @agentID={$ag} ";
-			break;
-		case 'GetAgents':
-			$query = "exec wwwGetAgents";
-			break;	*/
+		case 'getPhoto':
+			$key_event = $_POST['key_event'];			
+			$query = "select * from table(F_SELECT_FOTO_FOR_EVENT({$key_event}))";			
+			break;		
     }
 
     if (!isset($query)) {
         $response->msg = 'не правильный запрос';
     } else {
-        //$query = iconv("UTF-8", "windows-1251", $query);
         $query = stripslashes($query);
 
         try {
-            include "dbConnect.php";
-			/*$db_user = "munas_dba";
-			$db_pwd = "munas_dba";
-			$db_sid = "munas";			
-			$db_conn = oci_connect("$db_user", "$db_pwd", "$db_sid");*/
-			//$curs = OCINewCursor($db_conn);
+            include "dbConnect.php";			
             $result = oci_parse($db_conn, $query);
 			oci_execute($result); 
-						
-				/*$row = oci_fetch_assoc($result);
-				var_dump($row);
-				$r = oci_error();
-				var_dump($r);*/
-			//$result = mssql_query($query);
+			
             if ($result) {
 
-				for($i = 0; $i < /*mssql_num_fields($result)*/oci_num_fields($result); $i++){
+				for($i = 0; $i < oci_num_fields($result); $i++){
 					$response->fields[oci_field_name($result, $i)] = oci_field_type($result, $i);
 				}
 			
 			
-                while ($row = oci_fetch_array($result, OCI_ASSOC/*MSSQL_ASSOC*/)) {
+                while ($row = oci_fetch_array($result, OCI_ASSOC)) {
                     foreach ($row as $f => &$value) {
 					
 						if((($response->fields[$f] == 'char')||($response->fields[$f] == 'text'))&&($value)){
-							$value = /*iconv("windows-1251", "UTF-8",*/ $value/*)*/;
+							$value = $value;
 							
 						}
                     }
 
                     $response->data[] = array_change_key_case($row);
                 }
-
-                //$response->dvs = 'превед';
+                
                 unset($response->fields);
 
 				//paging
 				if($paging){
 
                     //filtering
-                    if(isset($_REQUEST['filter'])){
-                      $filterParams = json_decode(stripslashes($_REQUEST['filter']), true);
+                    if(isset($_POST['filter'])){
+                      $filterParams = json_decode(stripslashes($_POST['filter']), true);
                       $filterKey = strtolower($filterParams[0]['property']);
                       $filterValue = strtolower($filterParams[0]['value']);
 
@@ -162,8 +144,8 @@ if (!isset($_REQUEST['dbAct'])) {
                     }
 
                     //sorting
-                    if(isset($_REQUEST['sort'])){
-                      $sortParams = json_decode(stripslashes($_REQUEST['sort']), true);
+                    if(isset($_POST['sort'])){
+                      $sortParams = json_decode(stripslashes($_POST['sort']), true);
                       $sortKey = strtolower($sortParams[0]['property']);
                       $sortDir = strtolower($sortParams[0]['direction']);
 
@@ -173,18 +155,18 @@ if (!isset($_REQUEST['dbAct'])) {
                     }
 
                     //paging
-		  			$page = $_REQUEST['page'];
-        			$start = $_REQUEST['start'];
-        			$limit = $_REQUEST['limit'];
+		  			$page = $_POST['page'];
+        			$start = $_POST['start'];
+        			$limit = $_POST['limit'];
 					$response->total = count($response->data);
 					$response->data = array_slice($response->data, $start, $limit);
 				}
 				oci_free_statement($result);
-                //mssql_free_result($result);
+                
                 $response->success = true;
                 
             } else {
-                $response->msg = 'sql error: ' /*. iconv("windows-1251", "UTF-8", mssql_get_last_message())*/;
+                $response->msg = 'sql error: ' ;
             }
         }
         catch (exception $e) {

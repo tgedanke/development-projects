@@ -5,10 +5,9 @@
 
     require_once 'Spreadsheet/Excel/Writer.php';
 
-/*$db_user = "munas_dba";
-$db_pwd = "munas_dba";
-$db_sid = "munas";
-$db_conn = oci_connect("$db_user", "$db_pwd", "$db_sid");*/
+if ($_REQUEST['dbAct']!='getReport'){
+exit;
+}
  include_once "dbConnect.php";
 $d = explode('.', date('d.m.Y'));				
 $date_start=$_REQUEST[date_start] ? $_REQUEST[date_start] : strftime('%d.%m.%Y', mktime(0,0,0, $d[1], '01', $d[2]) );

@@ -11,13 +11,20 @@ Ext.define('Munas.controller.Main', {
 	'main.ComboMonth', 
 	'main.NumYear', 
 	'main.EventDateGrid',
-	'main.AddClassGrid'	
+	'main.AddClassGrid',
+	'main.PhotoWin',
+	'main.PhotoGrid',
+	'main.PhotoForm',
+	'main.EventTotal'
 	],
-	models : ['EventMod', 'DateMod', 'ClassEventMod'],
-	stores : ['EventStore', 'DateStore', 'ClassEventStore', 'PlaceStore', 'SecurStore', 'HistStore'/*, 'EventDateStore'*/],
+	models : ['EventMod', 'DateMod', 'ClassEventMod', 'PhotoMod'],
+	stores : ['EventStore', 'DateStore', 'ClassEventStore', 'PlaceStore', 'SecurStore', 'HistStore', 'PhotoStore', 'AgeStore'],
 	refs: [{
 		ref: 'EventForm',
 		selector: 'eventform'
+		},{
+		ref: 'EventTotal',
+		selector: 'eventtotal'
 		},{
 			ref: 'AdmTool',
 			selector: 'admtool'
@@ -31,9 +38,9 @@ Ext.define('Munas.controller.Main', {
 			'mainpanel' : {
 				tabchange : this.changeButtons
 			},
-			/*'admtool button[action=newevent]' : {
-				click : this.newEvent
-			},*/
+			'admtool button[action=photo]' : {
+				click : this.viewPhoto
+			},
 			'admtool button[action=eventdate]' : {
 				click : this.viewDate
 			},
@@ -52,6 +59,9 @@ Ext.define('Munas.controller.Main', {
 			'eventform checkboxfield[name=canceled]' : {
 				change : this.changeCansel
 			},
+			/*'eventform checkboxfield[name=kids]' : {
+				change : this.changeKids
+			},*/
 			'admtool combomonth' : {
 				change : this.changeMonth
 			},
@@ -68,17 +78,36 @@ Ext.define('Munas.controller.Main', {
 				keypress : this.pressEnter
 			}
 		});
-		
+		this.getEventStoreStore().on({
+			scope : this,
+			load : this.loadEventStore
+		});
 	},
-	/*previewDate : function (gr, rec) {
-		if (gr.isSelected(rec[0]) == true) {			
-		this.getEventDateStoreStore().load({
+	loadEventStore : function (st) {
+	this.getEventTotal().down('label[itemId=lab1]').setText('Количество мероприятий: ' + st.getCount());
+	},
+	viewPhoto : function (but) {
+	var sm = but.up('mainpanel').down('eventgrid').getSelectionModel();
+		if (sm.getCount() > 0 ) {
+			var w = Ext.widget('photowin');
+			//this.secure(w);//--security
+					
+			w.setTitle( 'Картинки для мероприятия - '+ sm.getSelection()[0].get('name'));
+			w.show();
+			var f = w.down('photoform');
+			f.down('textfield[name=key_event]').setValue(sm.getSelection()[0].get('key'));
+			f.down('textfield[name=type_modify]').setValue('I');
+			f.down('textfield[name=key]').setValue(-1);			
+			this.getPhotoStoreStore().load({
 			params : {
-				key_event : rec[0].data['key']
+				key_event : sm.getSelection()[0].get('key')
 			}
-			});		
-		} 		
-	},*/
+			});	
+			
+		} else {
+		Ext.Msg.alert('Не выбрано мероприятие!', 'Выделите мероприятие, для которого хотите загрузить картинки')
+		}			
+	},
 	secure : function (win){
 	var record = this.getSecurStoreStore().findRecord('key', '4');
 		if(record.data.key_role==1){
@@ -119,7 +148,16 @@ Ext.define('Munas.controller.Main', {
 			f.down('combobox[name=key_reason_cancel]').setDisabled(true);
 			f.down('combobox[name=key_reason_cancel]').setValue(null);
 		}
-	},	
+	},
+	/*changeKids : function ( field, newValue, oldValue, eOpts ){
+		var f = this.getEventForm();
+		if (newValue==true) {
+			f.down('combobox[name=key_age_limit]').setDisabled(false);
+		} else{
+			f.down('combobox[name=key_age_limit]').setDisabled(true);
+			f.down('combobox[name=key_age_limit]').setValue(null);
+		}
+	},*/
 	changeYear : function (){
 	this.loadEvSt();	
 	},
@@ -205,6 +243,7 @@ Ext.define('Munas.controller.Main', {
 			var but4 = tool.down('button[itemId=clear]');
 			var but5 = tool.down('button[itemId=filter]');
 			var but6 = tool.down('button[itemId=del]');
+			var but7 = tool.down('button[itemId=photo]');
 			var combo = tool.down('textfield[itemId=filter_event]');
 			var gr = tool.down('buttongroup[itemId=dategroup]');
 			but.setVisible(true);
@@ -213,6 +252,7 @@ Ext.define('Munas.controller.Main', {
 			but4.setVisible(true);
 			but5.setVisible(true);
 			but6.setVisible(true);
+			but7.setVisible(true);
 			combo.setVisible(true);
 			gr.setVisible(true);
 			this.secureAdd(but);//--Security			
@@ -233,6 +273,8 @@ Ext.define('Munas.controller.Main', {
 			but5.setVisible(false);
 			var but6 = tool.down('button[itemId=del]');
 			but6.setVisible(false);
+			var but7 = tool.down('button[itemId=photo]');
+			but7.setVisible(false);
 			
 		}
 	},

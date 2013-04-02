@@ -1,6 +1,7 @@
 Ext.define('Munas.controller.DateAdd', {
 	extend : 'Ext.app.Controller',
 	views : ['main.DateAddWin', 'main.DateAddForm'],
+	stores : ['EventDateStore'],
 	refs : [{
 			ref : 'DateAddForm',
 			selector : 'dateaddform'
@@ -80,6 +81,7 @@ Ext.define('Munas.controller.DateAdd', {
 					var text = Ext.decode(response.responseText);
 					if (text.success == true) {
 						win.close();
+						me.getEventDateStoreStore().reload();
 					} else {
 						Ext.Msg.alert('не сохранено!', text.msg);
 					}
