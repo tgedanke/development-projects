@@ -21,9 +21,9 @@ Ext.define('Munas.controller.Reports', {
 			var tool = this.getAdmTool();
 			var y = tool.down('numyear').value;
 			var m = tool.down('combomonth').value;
-			window.location.href = 'data/report_' + sm.getSelection()[0].get('key') + '.php?date_start=01.' + m + '.' + y;
+			window.location.href = 'data/report_' + sm.getSelection()[0].get('key') + '.php?dbAct=getReport&date_start=01.' + m + '.' + y;
 		} else {
-			Ext.Msg.alert('Не выбран отчет!', 'Выделите отчет!')
+			Ext.Msg.alert('РќРµ РІС‹Р±СЂР°РЅ РѕС‚С‡РµС‚!', 'Р’С‹РґРµР»РёС‚Рµ РѕС‚С‡РµС‚!')
 		}
 	}
 });

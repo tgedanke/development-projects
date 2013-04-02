@@ -5,6 +5,7 @@ Ext.define('Munas.store.RolesStore', {
 	proxy : {
 		type : 'ajax',
 		url : 'data/data.php',
+		actionMethods: 'POST',
 		reader : {
 			type : 'json',
 			root : 'data'

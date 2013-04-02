@@ -1,14 +1,14 @@
 <?php
-	
+	//require_once "secureCheck.php";
 
     require_once 'Spreadsheet/Excel/Writer.php';
 
 
 
-/*$db_user = "munas_dba";
-$db_pwd = "munas_dba";
-$db_sid = "munas";
-$db_conn = oci_connect("$db_user", "$db_pwd", "$db_sid");*/
+if ($_REQUEST['dbAct']!='getReport'){
+exit;
+}
+
  include_once "dbConnect.php";
 
 $d = explode('.', date('d.m.Y'));				

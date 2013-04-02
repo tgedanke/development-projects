@@ -2,7 +2,7 @@ Ext.define('Munas.controller.DateView', {
 	extend : 'Ext.app.Controller',
 	views : ['main.DateWin', 'main.DateForm', 'main.DateGrid', 'main.HistGrid'],
 	models : ['HistMod'],
-	stores : ['DateStore', 'HistStore'],
+	stores : ['DateStore', 'HistStore', 'EventDateStore'],
 	refs : [{
 			ref : 'DateForm',
 			selector : 'dateform'
@@ -110,6 +110,7 @@ Ext.define('Munas.controller.DateView', {
 					me.getHistStoreStore().reload();
 					me.getDateGrid().getSelectionModel().deselect(sel.row);
 					me.getDateGrid().getSelectionModel().select(sel.row);
+					me.getEventDateStoreStore().reload();
 				} else {
 					Ext.Msg.alert('Не сохранено!', text.msg);
 				}

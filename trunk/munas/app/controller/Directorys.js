@@ -1,12 +1,15 @@
 Ext.define('Munas.controller.Directorys', {
 	extend : 'Ext.app.Controller',
-	views : ['directorys.ContGrid', 'directorys.ContWin', 'directorys.ContForm', 'directorys.DirectPanel', 'directorys.ClassGrid', 'directorys.ClassWin', 'directorys.ClassForm', 'directorys.StateWin', 'directorys.StateForm', 'directorys.PlaceWin', 'directorys.PlaceForm', 'directorys.PlaceGrid', 'directorys.ReasonGrid', 'directorys.ReasonForm', 'directorys.AnsGrid', 'directorys.AnsWin', 'directorys.AnsForm', 'directorys.ReasonWin'],
+	views : ['directorys.ContGrid', 'directorys.ContWin', 'directorys.ContForm', 'directorys.DirectPanel', 'directorys.ClassGrid', 'directorys.ClassWin', 'directorys.ClassForm', 'directorys.StateWin', 'directorys.StateForm', 'directorys.PlaceWin', 'directorys.PlaceForm', 'directorys.PlaceGrid', 'directorys.ReasonGrid', 'directorys.ReasonForm', 'directorys.AnsGrid', 'directorys.AnsWin', 'directorys.AnsForm', 'directorys.ReasonWin', 'directorys.AgeForm', 'directorys.AgeWin'],
 	models : ['ContMod', 'StateMod', 'ClassMod', 'StreetMod', 'HouseMod', 'PlaceMod', 'ReasonMod', 'AnsMod'],
-	stores : ['ContStore', 'StateStore', 'ClassStore', 'StreetStore', 'HouseStore', 'PlaceStore', 'ReasonStore', 'AnsStore', 'SecurStore'],
+	stores : ['ContStore', 'StateStore', 'ClassStore', 'StreetStore', 'HouseStore', 'PlaceStore', 'ReasonStore', 'AnsStore', 'SecurStore', 'AgeStore'],
 	init : function () {
 		this.control({
 			'admtool button[action=newcont]' : {
 				click : this.newCont
+			},
+			'admtool button[action=newage]' : {
+				click : this.newAge
 			},
 			'admtool button[action=newclass]' : {
 				click : this.newClass
@@ -32,6 +35,9 @@ Ext.define('Munas.controller.Directorys', {
 			'placewin button[action=save]' : {
 				click : this.savePlace
 			},
+			'agewin button[action=save]' : {
+				click : this.saveAge
+			},
 			'directpanel' : {
 				tabchange : this.changeButton
 			},
@@ -52,6 +58,9 @@ Ext.define('Munas.controller.Directorys', {
 			},
 			'ansgrid' : {
 				itemdblclick : this.viewAns
+			},
+			'agegrid' : {
+				itemdblclick : this.viewAge
 			},
 			'stategrid' : {
 				itemdblclick : this.viewState
@@ -81,6 +90,9 @@ Ext.define('Munas.controller.Directorys', {
 				change : this.changeText
 			},
 			'reasonform textfield' : {
+				change : this.changeText
+			},
+			'ageform textfield' : {
 				change : this.changeText
 			},
 			'ansform textfield' : {
@@ -114,6 +126,7 @@ Ext.define('Munas.controller.Directorys', {
 		if (val) {
 			Ext.Ajax.request({
 				url : 'data/data.php',
+				method : 'POST',
 				params : {
 					dbAct : 'getStreetHouse',
 					key_house : newValue,
@@ -191,6 +204,14 @@ Ext.define('Munas.controller.Directorys', {
 		f.down('textfield[name=type_modify]').setValue('U');
 		w.show();
 	},
+	viewAge : function (me, rec, item, index, e, eOpts) {
+		var w = Ext.widget('agewin');
+		this.secure(w);
+		var f = w.down('ageform');
+		f.getForm().loadRecord(rec);
+		f.down('textfield[name=type_modify]').setValue('U');
+		w.show();
+	},
 	changeButton : function (tabPanel, newCard, oldCard, eOpts) {
 		var tool = tabPanel.up('mainpanel').down('admtool');
 		var but = tool.down('button[itemId=dir]');
@@ -219,6 +240,10 @@ Ext.define('Munas.controller.Directorys', {
 				but.action = 'newreason';
 				break;
 			}
+		case 'Возрастные ограничения': {
+				but.action = 'newage';
+				break;
+			}
 		default: {
 				but.action = 'newstate';
 			}
@@ -235,6 +260,13 @@ Ext.define('Munas.controller.Directorys', {
 		var w = Ext.widget('answin');
 		w.show();
 		var f = w.down('ansform');
+		f.down('textfield[name=type_modify]').setValue('I');
+		f.down('textfield[name=key]').setValue(-1);
+	},
+	newAge : function (but) {
+		var w = Ext.widget('agewin');
+		w.show();
+		var f = w.down('ageform');
 		f.down('textfield[name=type_modify]').setValue('I');
 		f.down('textfield[name=key]').setValue(-1);
 	},
@@ -282,6 +314,32 @@ Ext.define('Munas.controller.Directorys', {
 						form.reset();
 						win.close();
 						me.getClassStoreStore().load();
+					}
+				},
+				failure : function (form, action) {
+					Ext.Msg.alert('не сохранено!', action.result.msg);
+				}
+			});
+		} else {
+			Ext.Msg.alert('Не все поля заполнены', 'Откорректируйте информацию')
+		}
+	},
+	saveAge : function (btn) {
+		var me = this;
+		var win = btn.up('agewin');
+		var form = win.down('ageform');
+		if (form.getForm().isValid()) {
+			form.submit({
+				url : 'data/srv.php',
+				params : {
+					dbAct : 'setAgeLimit'
+				},
+				submitEmptyText : false,
+				success : function (form, action) {
+					if (action.result.success == true) {
+						form.reset();
+						win.close();
+						me.getAgeStoreStore().load();
 					}
 				},
 				failure : function (form, action) {

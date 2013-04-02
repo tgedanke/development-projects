@@ -1,19 +1,18 @@
-Ext.define('Munas.view.main.EventWin', {
+Ext.define('Munas.view.directorys.AgeWin', {
 	extend : 'Ext.Window',
 	extend : 'Ext.window.Window',
-	alias : 'widget.eventwin',
-	requires : ['Munas.view.main.EventForm'],
-	title : 'Мероприятия',
+	alias : 'widget.agewin',
+	requires : ['Munas.view.directorys.AgeForm'],
+	title : 'Причина',
 	layout : 'fit',
-	
 	autoShow : true,
-	height : 420,
-	width : 750,
+	height : 130,
+	width : 400,
 	resizable : false,
 	modal : true,
 	initComponent : function () {
 		this.items = [{
-				xtype : 'eventform'
+				xtype : 'ageform'
 			}
 		];
 		this.buttons = [{

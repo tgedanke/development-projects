@@ -9,11 +9,15 @@ $response = new Response();
 //echo '1';
 if ( !empty( $_POST['user'] )) {
    include_once "dbConnect.php";
-    /*$db_user = "munas_dba";
-	$db_pwd = "munas_dba";
-	$db_sid = "munas";
-	$db_conn = oci_connect("$db_user", "$db_pwd", "$db_sid");*/
-	$query = "select * from table(f_check_s_users('{$_POST[user]}','{$_POST[password]}'))"; 
+
+function hash_pass($text){
+$text=md5(sha1($text)."solo".md5(sha1($text).$text{1}));
+$text=md5($text{7}.$text.$text{0});
+return($text);
+}
+	$pass = hash_pass($_POST['password']);
+	//echo $pass;
+	$query = "select * from table(f_check_s_users('{$_POST[user]}','{$pass}'))"; 
 	//$query = "select * from table(f_check_s_users('ad','12'))"; 
 	//$query = stripslashes($query);
 	$result = oci_parse($db_conn, $query);

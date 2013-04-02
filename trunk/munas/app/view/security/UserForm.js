@@ -28,6 +28,7 @@ Ext.define('Munas.view.security.UserForm', {
 		}, {
 			xtype : 'textfield',
 			name : 'password',
+			inputType : 'password',
 			width : 360,
 			allowBlank : false,
 			fieldLabel : 'Пароль*'
@@ -35,6 +36,7 @@ Ext.define('Munas.view.security.UserForm', {
 			xtype : 'textfield',
 			name : 'password2',
 			width : 360,
+			inputType : 'password',
 			allowBlank : false,
 			fieldLabel : 'Пароль еще раз*'
 		}, {

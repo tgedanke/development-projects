@@ -1,7 +1,6 @@
-Ext.define('Munas.store.ContStore', {
+Ext.define('Munas.store.AgeStore', {
 	extend : 'Ext.data.Store',
-	model : 'Munas.model.ContMod',
-	//autoLoad : true,
+	model : 'Munas.model.AgeMod',	
 	proxy : {
 		type : 'ajax',
 		url : 'data/data.php',
@@ -11,7 +10,7 @@ Ext.define('Munas.store.ContStore', {
 			root : 'data'
 		},
 		extraParams : {
-			dbAct : 'getContacts'
+			dbAct : 'getAgeLimit'
 		}
 	}
 });

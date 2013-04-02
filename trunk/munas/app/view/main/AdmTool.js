@@ -28,6 +28,14 @@ Ext.define('Munas.view.main.AdmTool', {
 			action : 'dateadd',
 			xtype : 'button'
 		},{
+			tooltip : 'Добавить картинки',
+			iconCls : 'photo',
+			scale : 'large',
+			//hidden : true,
+			itemId: 'photo',
+			action : 'photo',
+			xtype : 'button'
+		},{
 			tooltip : 'Удалить мероприятие',
 			iconCls : 'event-del',
 			scale : 'large',
