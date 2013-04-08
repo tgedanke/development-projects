@@ -43,7 +43,8 @@ public $key; /*Ключ*/
 }
   
 require_once 'Spreadsheet/Excel/Writer.php';
- 
+require_once 'MPDF56/mpdf.php';
+
   
 function connDB()
 {
@@ -129,6 +130,146 @@ foreach ($resAr as $item)
 	return $returnval;
 }
 
+
+
+function printExcel($resAr, $resArData, $groupd)
+{	
+	
+/*пишем в эксель*/
+// Creating a workbook
+$workbook = new Spreadsheet_Excel_Writer();
+$workbook->setTempDir(ini_get('upload_tmp_dir'));
+// sending HTTP headers
+$workbook->send('Отчет.xls');
+// Creating a worksheet
+$worksheet =& $workbook->addWorksheet(iconv( "UTF-8", "windows-1251",'Отчет'));
+
+// The format data
+$format_d = array();// The format data
+$r = 0;//пишем в эту строку не с 0, для красоты, отступ $o
+$o = 1;// отступ 
+$c = 0;//и эту колонку
+$i = 0;
+$maxr=0;//кол-во строк, без учета заголовка для выводда кол-ва внизу 
+
+	foreach ($resAr as $item)
+	{
+	//задаем стили для данного объекта
+	$format_d[$i] =& $workbook->addFormat();
+	$format_d[$i]->setLeft($item->borderL);//Граница_л
+	$format_d[$i]->setTop($item->borderT);//Граница_в
+	$format_d[$i]->setBottom($item->borderB);//Граница_н
+	$format_d[$i]->setRight($item->borderR);//Граница_пр
+	$format_d[$i]->setSize($item->fontSize);//Шрифт размер
+	$cc=0;
+	$item->fWidth = round(8.43*$item->fWidth/64);//тк в табличке ширина столбца в пикселах, а в екселе в пунктах, при том, что 8,43 пункта = 64 пикселя, переведем в пункты
+	
+		if ($item->fType == 0)//шапка таблички
+		{
+			$r=$o;
+			$c++;
+			$item->fWidth = ($item->fWidth >= (strlen($item->fildView)+10))? $item->fWidth :(strlen($item->fildView)+10);//на случай, если текст длиннее +зазор 10 букв
+			$worksheet->setColumn($c,$c,$item->fWidth);//Ширина столбца
+			$worksheet->setRow($r,$item->fHeight); //Высота строки
+			$worksheet->write($r, $c, iconv( "UTF-8", "windows-1251", $item->fildView ),$format_d[$i] );
+			$colGroup = (int)$item->fgroup;//надо ли группировать шапку?
+			if ($colGroup > 1)//растянем шапку на нужное кол-во столбцов
+				{
+				$worksheet->mergeCells ($r,$c,$r+$colGroup,$c);
+				}
+			$r++;
+		}
+		if (($item->fType == 1)&&((int)$item->group == 0))//данные кроме столбцов группировки
+		{
+			if($r>$o+1){$r=$o+1; $c++;}
+				foreach ($resArData[$i]  as $element => $vals)
+				{ 
+			$item->fWidth = ($item->fWidth >= (strlen($vals)+10))? $item->fWidth :(strlen($vals)+10);//на случай, если текст длиннее +зазор 10 букв
+			$worksheet->setColumn($c,$c,$item->fWidth);//Ширина столбца
+					$worksheet->write($r, $c, iconv( "UTF-8", "windows-1251", $vals ),$format_d[$i]);
+					$worksheet->setRow($r,$item->fHeight); //Высота строки
+					if (!in_array (($r-$o-1),$groupd[1])){$cc ++;}//считаем строки в кахдом столбце. проверка является ли данная строка группир. -отступ и -1 - из-за заголовка
+					$r++;
+				}
+
+			$maxr = ($maxr > $cc)? $maxr : $cc;
+		}
+		if ($item->fType == 2)//кол-во
+		{
+		$vl=iconv( "UTF-8", "windows-1251", $item->fildView );
+		$worksheet->write($r, $item->fColumn, ((strtolower($vl)!= 'count')? $vl :$maxr ),$format_d[$i] );
+		$worksheet->setRow($r,$item->fHeight); //Высота строки
+		
+		if($item->fColumn > 1){$r++;}
+		}	
+		$i++;
+	}
+	for ($j=0;$j<count($groupd[1]);$j++)//объединить ячейки группир.
+	{
+	$worksheet->mergeCells (($groupd[1][$j]+$o+1),1,($groupd[1][$j]+$o+1),$c);
+	}
+	
+
+	
+$workbook->close();
+
+}
+
+
+function printPDF($resAr, $resArData, $groupd)
+{
+$html='';
+$th='';
+$lastrow='';
+$maxlen=0;
+$i=0;
+foreach ($resAr as $item)
+	{
+	if ($item->fType == 0)//шапка таблички
+		{
+		$th= $th.'<th>'.iconv( "UTF-8", "windows-1251", $item->fildView ).'</th>';
+		}
+	if ($item->fType == 2)//кол-воили что-то еще таблички
+		{
+		$lastrow= $lastrow.'<td>'.iconv( "UTF-8", "windows-1251", $item->fildView ).'</td>';
+		}
+	if ($item->fType == 1)//данные
+		{
+		$maxlen=strlen($resArData[$i])>$maxlen?strlen($resArData[$i]):$maxlen;
+		}
+	$i++;	
+	}
+$rows='';
+for ($i = 0; $i < $maxlen-1; $i++) 
+	{
+	$rows=$rows.'<tr>';
+	for ($j=0; $j < count($resAr);$j++)
+		{
+		if ($resAr[$j]->fType == 1)
+		{
+		$rows=$rows.'<td>'.iconv( "UTF-8", "windows-1251",$resArData[$j][$i]).'</td>';
+		}
+		}
+	$rows=$rows.'</tr>';	
+	}
+$th='<tr>'.$th.'</tr>';
+$lastrow='<tr>'.$lastrow.'</tr>';
+	
+$html= '<table border=1>'.$th.$rows.$lastrow.'</table>';
+//echo $html;
+
+$mpdf = new mPDF('utf-8', 'A4', '8', '', 10, 10, 7, 7, 10, 10); //задаем формат, отступы и.т.д.
+$mpdf->charset_in = 'cp1251'; //не забываем про русский
+
+$stylesheet = '';//'table {text-align: center;font-size: 20pt;width: 100%;}';//file_get_contents('style.css'); //подключаем css
+$mpdf->WriteHTML($stylesheet, 1);
+
+$mpdf->list_indent_first_level = 0;
+$mpdf->WriteHTML($html, 2); //формируем pdf
+$mpdf->Output('mpdf.pdf', 'I');
+
+}
+
 /*собираем данные для отчета*/
 $keys = 0;
 $resArray = initClass($keys);
@@ -181,88 +322,8 @@ foreach ($groupdata[0] as $item)//если не по1 полю группиро�
 	}
 
 }
-	
-	
-	
-/*пишем в эксель*/
-// Creating a workbook
-$workbook = new Spreadsheet_Excel_Writer();
-$workbook->setTempDir(ini_get('upload_tmp_dir'));
-// sending HTTP headers
-$workbook->send('Отчет.xls');
-// Creating a worksheet
-$worksheet =& $workbook->addWorksheet(iconv( "UTF-8", "windows-1251",'Отчет'));
-
-// The format data
-$format_d = array();// The format data
-$r = 0;//пишем в эту строку не с 0, для красоты, отступ $o
-$o = 1;// отступ 
-$c = 0;//и эту колонку
-$i = 0;
-$maxr=0;//кол-во строк, без учета заголовка для выводда кол-ва внизу 
-
-	foreach ($resArray as $item)
-	{
-	//задаем стили для данного объекта
-	$format_d[$i] =& $workbook->addFormat();
-	$format_d[$i]->setLeft($item->borderL);//Граница_л
-	$format_d[$i]->setTop($item->borderT);//Граница_в
-	$format_d[$i]->setBottom($item->borderB);//Граница_н
-	$format_d[$i]->setRight($item->borderR);//Граница_пр
-	$format_d[$i]->setSize($item->fontSize);//Шрифт размер
-	$cc=0;
-	$item->fWidth = round(8.43*$item->fWidth/64);//тк в табличке ширина столбца в пикселах, а в екселе в пунктах, при том, что 8,43 пункта = 64 пикселя, переведем в пункты
-	
-		if ($item->fType == 0)//шапка таблички
-		{
-			$r=$o;
-			$c++;
-			$item->fWidth = ($item->fWidth >= (strlen($item->fildView)+10))? $item->fWidth :(strlen($item->fildView)+10);//на случай, если текст длиннее +зазор 10 букв
-			$worksheet->setColumn($c,$c,$item->fWidth);//Ширина столбца
-			$worksheet->setRow($r,$item->fHeight); //Высота строки
-			$worksheet->write($r, $c, iconv( "UTF-8", "windows-1251", $item->fildView ),$format_d[$i] );
-			$colGroup = (int)$item->fgroup;//надо ли группировать шапку?
-			if ($colGroup > 1)//растянем шапку на нужное кол-во столбцов
-				{
-				$worksheet->mergeCells ($r,$c,$r+$colGroup,$c);
-				}
-			$r++;
-		}
-		if (($item->fType == 1)&&((int)$item->group == 0))//данные кроме столбцов группировки
-		{
-			if($r>$o+1){$r=$o+1; $c++;}
-				foreach ($resArrayData[$i]  as $element => $vals)
-				{ 
-			$item->fWidth = ($item->fWidth >= (strlen($vals)+10))? $item->fWidth :(strlen($vals)+10);//на случай, если текст длиннее +зазор 10 букв
-			$worksheet->setColumn($c,$c,$item->fWidth);//Ширина столбца
-					$worksheet->write($r, $c, iconv( "UTF-8", "windows-1251", $vals ),$format_d[$i]);
-					$worksheet->setRow($r,$item->fHeight); //Высота строки
-					if (!in_array (($r-$o-1),$groupdata[1])){$cc ++;}//считаем строки в кахдом столбце. проверка является ли данная строка группир. -отступ и -1 - из-за заголовка
-					$r++;
-				}
-
-			$maxr = ($maxr > $cc)? $maxr : $cc;
-		}
-		if ($item->fType == 2)//кол-во
-		{
-		$vl=iconv( "UTF-8", "windows-1251", $item->fildView );
-		$worksheet->write($r, $item->fColumn, ((strtolower($vl)!= 'count')? $vl :$maxr ),$format_d[$i] );
-		$worksheet->setRow($r,$item->fHeight); //Высота строки
-		
-		if($item->fColumn > 1){$r++;}
-		}	
-		$i++;
-	}
-	for ($j=0;$j<count($groupdata[1]);$j++)//объединить ячейки группир.
-	{
-	$worksheet->mergeCells (($groupdata[1][$j]+$o+1),1,($groupdata[1][$j]+$o+1),$c);
-	}
-	
-
-	
-$workbook->close();
-
-
+	//$pr= printExcel($resArray, $resArrayData, $groupdata);
+$pr= printPDF($resArray, $resArrayData, $groupdata);
 
  
 ?>
