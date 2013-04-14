@@ -68,7 +68,7 @@ $repmass = array();
 	while ($row = oci_fetch_array($result, OCI_ASSOC))
 		{
 		$repmass[$i] = new field ($keys, $row["KEY_COLUMN"], $row["FIELD_VIEW"], $row["F_WIDTH"], $row["F_HEIGHT"],
-		$row["BORDER_L"], $row["ORDER"], $row["GROUP"], $row["FONT_SIZE"], $row["NAME_VIEW"], $row["KEY_TEMPLATE"], 
+		$row["BORDER_L"], $row["ORDER"], $row["T_GROUP"], $row["FONT_SIZE"], $row["NAME_VIEW"], $row["KEY_TEMPLATE"], 
 		$row["F_COLUMN"],$row["F_ROW"],$row["BORDER_R"],$row["BORDER_B"],$row["BORDER_T"],$row["F_TYPE"]);
 		$i++;	
 		} 
@@ -221,42 +221,95 @@ function printPDF($resAr, $resArData, $groupd)
 $html='';
 $th='';
 $lastrow='';
+$rows='';
 $maxlen=0;
 $i=0;
+$style='';
+$fCol='';
 foreach ($resAr as $item)
 	{
+	$borl='border-left: '.(int)$item->borderL .'px solid; ';//Граница_л  
+	$bort='border-top: '.(int)$item->borderT .'px solid; ';//Граница_в
+	$borb='border-bottom: '.(int)$item->borderB .'px solid; ';//Граница_н
+	$borr='border-right: '.(int)$item->borderR .'px solid; ';//Граница_пр
+	$fonts='font-size: '.(int)$item->fontSize .'px; ';//Шрифт размер
+	$hei='height: '.(int)$item->fHeight.'px; ';
+	$wid='width: '.(int)$item->fWidth.'px; ';
+	$style=$borl.$bort.$borb.$borr.$fonts.$hei.$wid;
+	
+	
 	if ($item->fType == 0)//шапка таблички
 		{
-		$th= $th.'<th>'.iconv( "UTF-8", "windows-1251", $item->fildView ).'</th>';
+		
+		$th= $th.'<td style="'.$style.'">'.iconv( "UTF-8", "windows-1251", $item->fildView ).'</td>';
 		}
 	if ($item->fType == 2)//кол-воили что-то еще таблички
 		{
-		$lastrow= $lastrow.'<td>'.iconv( "UTF-8", "windows-1251", $item->fildView ).'</td>';
+		//$maxlen;
+		$fCol=$item->fColumn;
+		if ((int)$fCol<2)
+			{
+			$fCol=iconv( "UTF-8", "windows-1251", $item->fildView );
+			}
+		else 
+			{
+			$fCol=$maxlen-1;
+			}
+			$lastrow= $lastrow.'<td style="'.$style.'">'.$fCol.'</td>';	
 		}
 	if ($item->fType == 1)//данные
 		{
-		$maxlen=strlen($resArData[$i])>$maxlen?strlen($resArData[$i]):$maxlen;
+		$maxlen=(strlen($resArData[$i])>$maxlen)?strlen($resArData[$i]):$maxlen;
 		}
 	$i++;	
 	}
-$rows='';
-for ($i = 0; $i < $maxlen-1; $i++) 
+	
+$txt='';
+for ($i = 0; $i <= $maxlen; $i++) 
 	{
-	$rows=$rows.'<tr>';
+	$txt='';
+	$isgroup=0;
 	for ($j=0; $j < count($resAr);$j++)
 		{
-		if ($resAr[$j]->fType == 1)
-		{
-		$rows=$rows.'<td>'.iconv( "UTF-8", "windows-1251",$resArData[$j][$i]).'</td>';
+			$borl='border-left: '.(int)$resAr[$j]->borderL .'px solid; ';//Граница_л  
+			$bort='border-top: '.(int)$resAr[$j]->borderT .'px solid; ';//Граница_в
+			$borb='border-bottom: '.(int)$resAr[$j]->borderB .'px solid; ';//Граница_н
+			$borr='border-right: '.(int)$resAr[$j]->borderR .'px solid; ';//Граница_пр
+			$fonts='font-size: '.(int)$resAr[$j]->fontSize .'px; ';//Шрифт размер
+			$hei='height: '.(int)$resAr[$j]->fHeight.'px; ';
+			$wid='width: '.(int)$resAr[$j]->fWidth.'px; ';
+			$style=$borl.$bort.$borb.$borr.$fonts.$hei.$wid;
+
+		
+			if (($resAr[$j]->fType == 1)&&((int)$resAr[$j]->group == 0))//данные кроме столбцов группировки
+			{
+			if (strlen($resArData[$j][$i])>0)
+				{
+				if (in_array($i, $groupd[1], true))
+					{
+					if($isgroup==0)
+						{
+						$txt=$txt.'<td style="'.$style.'" colspan='.count($resAr).'>'.iconv( "UTF-8", "windows-1251",$resArData[$j][$i]).'</td>';
+						$isgroup++;
+						}
+					}
+				else
+					{	
+					$txt=$txt.'<td style="'.$style.'">'.iconv( "UTF-8", "windows-1251",$resArData[$j][$i]).'</td>';
+					}
+				}
+			}
 		}
-		}
-	$rows=$rows.'</tr>';	
+	$txt=(strlen($txt)>0)?('<tr>'.$txt.'</tr>'):$txt;
+	$rows=$rows.$txt;	
 	}
 $th='<tr>'.$th.'</tr>';
 $lastrow='<tr>'.$lastrow.'</tr>';
 	
-$html= '<table border=1>'.$th.$rows.$lastrow.'</table>';
+$html= '<table style="border-collapse: collapse;">'.$th.$rows.$lastrow.'</table>';
 //echo $html;
+
+
 
 $mpdf = new mPDF('utf-8', 'A4', '8', '', 10, 10, 7, 7, 10, 10); //задаем формат, отступы и.т.д.
 $mpdf->charset_in = 'cp1251'; //не забываем про русский
@@ -312,7 +365,7 @@ foreach ($groupdata[0] as $item)//если не по1 полю группиро�
 				if (($j != (int)$item) && ($resArray[$j]->fType == 1))
 					{ 
 						array_splice($resArrayData[$j], ($i+$counts), 0, $vals);
-						$groupdata[1][count($groupdata[1])]=($i+$counts);
+						$groupdata[1][count($groupdata[1])]=(int)($i+$counts);
 					}
 				}
 				$counts++;
@@ -325,5 +378,4 @@ foreach ($groupdata[0] as $item)//если не по1 полю группиро�
 	//$pr= printExcel($resArray, $resArrayData, $groupdata);
 $pr= printPDF($resArray, $resArrayData, $groupdata);
 
- 
 ?>
