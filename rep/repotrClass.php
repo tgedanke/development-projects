@@ -44,6 +44,7 @@ public $key; /*Ключ*/
   
 require_once 'Spreadsheet/Excel/Writer.php';
 require_once 'MPDF56/mpdf.php';
+require_once 'html_to_doc/html_to_doc.inc.php' ;
 
   
 function connDB()
@@ -216,7 +217,7 @@ $workbook->close();
 }
 
 
-function printPDF($resAr, $resArData, $groupd)
+function getHTMLforPdfDoc($resAr, $resArData, $groupd)//формирует текст в html
 {
 $html='';
 $th='';
@@ -307,9 +308,16 @@ $th='<tr>'.$th.'</tr>';
 $lastrow='<tr>'.$lastrow.'</tr>';
 	
 $html= '<table style="border-collapse: collapse;">'.$th.$rows.$lastrow.'</table>';
-//echo $html;
+return $html;
 
 
+
+
+}
+
+function printPDF($resAr, $resArData, $groupd)
+{
+$html = getHTMLforPdfDoc($resAr, $resArData, $groupd);
 
 $mpdf = new mPDF('utf-8', 'A4', '8', '', 10, 10, 7, 7, 10, 10); //задаем формат, отступы и.т.д.
 $mpdf->charset_in = 'cp1251'; //не забываем про русский
@@ -320,6 +328,19 @@ $mpdf->WriteHTML($stylesheet, 1);
 $mpdf->list_indent_first_level = 0;
 $mpdf->WriteHTML($html, 2); //формируем pdf
 $mpdf->Output('mpdf.pdf', 'I');
+
+
+}
+
+function printDOC($resAr, $resArData, $groupd)
+{
+$html = getHTMLforPdfDoc($resAr, $resArData, $groupd);
+
+
+header("Content-type: application/vnd.ms-word");
+header("Content-Disposition: attachment;Filename=отчет.doc");
+
+echo  $html;
 
 }
 
@@ -376,6 +397,6 @@ foreach ($groupdata[0] as $item)//если не по1 полю группиро�
 
 }
 	//$pr= printExcel($resArray, $resArrayData, $groupdata);
-$pr= printPDF($resArray, $resArrayData, $groupdata);
-
+//$pr= printPDF($resArray, $resArrayData, $groupdata);
+$pr= printDOC($resArray, $resArrayData, $groupdata);
 ?>
